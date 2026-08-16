@@ -373,7 +373,6 @@ function icon_svg($name, $size = 20) {
         'check-circle' => '<circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8.5 12l2.5 2.5 4.5-5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>',
         'image' => '<rect x="3.5" y="4" width="17" height="16" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="9" cy="9.5" r="1.8" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M4.5 17l4.5-4 3 2.7 3.5-3.5 4 3.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>',
     );
-    }
     if (!isset($paths[$name])) $name = 'info';
     return '<svg width="' . $size . '" height="' . $size . '" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' . $paths[$name] . '</svg>';
 }
