@@ -1,0 +1,329 @@
+/* ==========================================================================
+   صفحه عمومی کارت ویزیت — استایل ۶ قالب (فارسی / راست‌چین / موبایل‌فرست)
+   هر قالب ظاهر کاملاً مجزا دارد: چیدمان، رنگ، فونت و جزئیات متفاوت.
+   ========================================================================== */
+
+@font-face{font-family:'Vazirmatn';src:url('../fonts/Vazirmatn-Regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'Vazirmatn';src:url('../fonts/Vazirmatn-Medium.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:'Vazirmatn';src:url('../fonts/Vazirmatn-SemiBold.woff2') format('woff2');font-weight:600;font-style:normal;font-display:swap}
+@font-face{font-family:'Vazirmatn';src:url('../fonts/Vazirmatn-Bold.woff2') format('woff2');font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:'Vazirmatn';src:url('../fonts/Vazirmatn-Black.woff2') format('woff2');font-weight:900;font-style:normal;font-display:swap}
+
+:root{
+  --muted:#64748b;
+  --line:#e2e8f0;
+  --c1:#4f46e5;
+  --c2:#7c3aed;
+  --shadow:0 6px 22px rgba(15,23,42,.07);
+}
+/* متغیرهای مشتق‌شده (--c1-soft، --c1-glow و ...) توسط card_head در PHP محاسبه و
+   به‌صورت مقادیر ثابت روی .card-page تزریق می‌شوند؛ اینجا فقط نام آن‌ها استفاده می‌شود. */
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:'Vazirmatn',system-ui,sans-serif;background:#eef1f6;color:#1e293b;line-height:1.7;font-size:15px;min-height:100vh}
+a{text-decoration:none;color:inherit}
+img{max-width:100%}
+
+.card-shell{max-width:480px;margin:0 auto;padding:0 0 26px;position:relative}
+
+.card-body{padding:18px 14px 8px}
+
+/* ---------- اِلمان‌های مشترک (هر قالب آن‌ها را دوباره استایل می‌کند) ---------- */
+.card-logo{width:96px;height:96px;border-radius:26px;border:4px solid #fff;object-fit:cover;flex-shrink:0;box-shadow:0 10px 26px rgba(15,23,42,.22)}
+.card-logo-ph{display:flex;align-items:center;justify-content:center;background:var(--grad);color:#fff;font-weight:900;font-size:30px}
+.logo-center .card-logo{margin-bottom:14px}
+.name{font-size:21px;font-weight:900;line-height:1.4}
+.role{font-size:14px;margin-top:2px}
+.company{font-size:13px;display:flex;align-items:center;gap:5px;margin-top:2px}
+
+.save-btn{display:flex;align-items:center;justify-content:center;gap:9px;font-weight:700;font-size:15px;border-radius:14px;padding:14px;margin-bottom:14px;transition:.18s;cursor:pointer}
+.save-btn:hover{transform:translateY(-1px)}
+
+.act-row{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:14px}
+.act-btn{display:flex;flex-direction:column;align-items:center;gap:6px;border-radius:13px;padding:11px 4px;font-size:11.5px;font-weight:600;transition:.15s}
+.act-btn:hover{box-shadow:var(--shadow);transform:translateY(-1px)}
+@media(max-width:360px){.act-row{grid-template-columns:repeat(2,1fr)}}
+
+.card-block{border-radius:16px;padding:16px;margin-bottom:14px}
+.blk-title{font-size:13.5px;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.bio-text{font-size:13.5px;white-space:pre-line;line-height:1.9}
+
+.info-list{list-style:none;padding:6px 16px;margin-bottom:14px}
+.info-list li{border-bottom:1px solid #f1f5f9}
+.info-list li:last-child{border-bottom:none}
+.info-list a,.info-list li{display:flex;align-items:center;gap:12px;padding:12px 0}
+.il-icon{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.il-body{flex:1;min-width:0;display:flex;flex-direction:column}
+.il-label{font-size:11px}
+.il-value{font-size:13.5px;font-weight:600;word-break:break-word}
+.il-arrow{flex-shrink:0;opacity:.6}
+
+.socials-row{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;border-radius:16px;padding:14px;margin-bottom:14px}
+.soc-btn{width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center;color:#fff;transition:.18s}
+.soc-btn:hover{transform:translateY(-2px) scale(1.05)}
+.soc-instagram{background:radial-gradient(circle at 30% 110%,#fdf497 0%,#fd5949 45%,#d6249f 60%,#285AEB 90%)}
+.soc-telegram{background:#229ed9}
+.soc-whatsapp{background:#25d366}
+.soc-linkedin{background:#0a66c2}
+.soc-twitter{background:#0f1419}
+.soc-youtube{background:#ff0000}
+.soc-tiktok{background:#010101;box-shadow:2px 2px 0 #25f4ee,-2px -2px 0 #fe2c55}
+.soc-facebook{background:#1877f2}
+.soc-github{background:#24292f}
+.soc-aparat{background:#ee384e}
+.soc-threads{background:#101010}
+.soc-snapchat{background:#fffc00;color:#0f1419}
+.soc-pinterest{background:#e60023}
+.soc-website{background:#64748b}
+
+.map-frame{border-radius:12px;overflow:hidden;height:190px}
+.map-frame iframe{width:100%;height:100%;border:0;display:block}
+.map-open{display:inline-flex;align-items:center;gap:7px;margin-top:10px;font-size:13px;font-weight:600}
+
+.qr-block{text-align:center}
+.qr-inner{display:inline-block;background:#fff;border:1px solid var(--line);border-radius:16px;padding:10px}
+.qr-inner img{width:210px;height:210px;display:block}
+.qr-link{display:block;margin-top:12px;font-size:12px;direction:ltr;word-break:break-all}
+
+.share-block{text-align:center;margin-top:6px}
+.share-label{font-size:12px;display:block;margin-bottom:9px}
+.share-row{display:flex;gap:10px;justify-content:center}
+.share-btn{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit;transition:.15s}
+
+.card-foot{text-align:center;padding:18px 0 0;font-size:12px}
+.card-foot a:hover{opacity:.8}
+
+/* ---------- toast ---------- */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:#0f172a;color:#fff;padding:11px 20px;border-radius:12px;font-size:13px;font-weight:600;box-shadow:0 12px 30px rgba(0,0,0,.3);transition:.3s;z-index:99;opacity:0;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+/* ==========================================================================
+   قالب: کلاسیک  —  بنر رنگی، آواتار چرخیده، کارت‌های سفید
+   ========================================================================== */
+.tpl-classic{background:#eef1f6}
+.card-page.tpl-classic{background:#eef1f6}
+.tpl-classic .card-header{position:relative}
+.tpl-classic .card-cover{height:180px;background:var(--grad);border-radius:0 0 24px 24px}
+.tpl-classic .card-id{display:flex;margin-top:-34px;padding:0 20px;position:relative}
+.tpl-classic .card-id.logo-center{flex-direction:column;align-items:center;text-align:center}
+.tpl-classic .card-id.logo-right{flex-direction:row;align-items:center;gap:16px}
+.tpl-classic .card-id.logo-left{flex-direction:row-reverse;align-items:center;gap:16px}
+.tpl-classic .card-logo{width:100px;height:100px;border-radius:26px}
+.tpl-classic .id-text{background:#fff;border-radius:18px;box-shadow:var(--shadow);padding:18px 20px;min-width:0}
+.tpl-classic .name{font-size:23px;color:#0f172a}
+.tpl-classic .role{color:#475569;font-weight:600}
+.tpl-classic .company{color:#64748b}
+.tpl-classic .save-btn{background:var(--grad);color:#fff;box-shadow:0 8px 22px var(--c1-glow)}
+.tpl-classic .save-btn:hover{box-shadow:0 11px 28px var(--c1-glow)}
+.tpl-classic .act-btn{background:#fff;border:1px solid var(--line);color:#334155}
+.tpl-classic .act-btn:hover{border-color:var(--c1);color:var(--c1)}
+.tpl-classic .card-block{background:#fff;box-shadow:var(--shadow)}
+.tpl-classic .blk-title{color:#334155}
+.tpl-classic .bio-text{color:#475569}
+.tpl-classic .info-list{background:#fff;border-radius:16px;box-shadow:var(--shadow)}
+.tpl-classic .il-icon{background:var(--c1-soft);color:var(--c1)}
+.tpl-classic .il-label{color:#94a3b8}
+.tpl-classic .il-value{color:#1e293b}
+.tpl-classic .il-arrow{color:#cbd5e1}
+.tpl-classic .socials-row{background:#fff;box-shadow:var(--shadow)}
+.tpl-classic .map-frame{border:1px solid var(--line)}
+.tpl-classic .map-open{color:var(--c1)}
+.tpl-classic .share-btn{background:#fff;border:1px solid var(--line);color:#475569}
+.tpl-classic .share-btn:hover{color:var(--c1);border-color:var(--c1)}
+.tpl-classic .card-foot{color:#64748b}
+
+/* ==========================================================================
+   قالب: تیره  —  شب، شیشه‌ای، اکسانت بنفش
+   ========================================================================== */
+.card-page.tpl-dark{background:#0b1120;color:#e2e8f0}
+.tpl-dark .card-header{position:relative}
+.tpl-dark .card-cover{height:150px;background:radial-gradient(120% 120% at 85% 10%,var(--c1-glow),transparent 55%),linear-gradient(160deg,var(--c1-dim),#0b1120 70%)}
+.tpl-dark .card-id{display:flex;margin-top:18px;padding:0 18px;position:relative}
+.tpl-dark .card-id.logo-center{flex-direction:column;align-items:center;text-align:center}
+.tpl-dark .card-id.logo-right{flex-direction:row;align-items:center;gap:16px}
+.tpl-dark .card-id.logo-left{flex-direction:row-reverse;align-items:center;gap:16px}
+.tpl-dark .card-logo{width:88px;height:88px;border-radius:50%;border:4px solid #0b1120;box-shadow:0 0 0 2px var(--c1-glow),0 10px 26px rgba(0,0,0,.5)}
+.tpl-dark .id-text{padding:0 2px;min-width:0}
+.tpl-dark .name{font-size:22px;color:#f8fafc}
+.tpl-dark .role{color:var(--c1-light);font-weight:600}
+.tpl-dark .company{color:#94a3b8}
+.tpl-dark .save-btn{background:var(--grad);color:#fff;box-shadow:0 8px 24px var(--c1-glow)}
+.tpl-dark .save-btn:hover{box-shadow:0 11px 30px var(--c1-glow)}
+.tpl-dark .act-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#e2e8f0}
+.tpl-dark .act-btn:hover{border-color:var(--c1-light);color:#fff;box-shadow:0 6px 20px var(--c1-glow)}
+.tpl-dark .glass{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:6px 14px;margin-bottom:14px}
+.tpl-dark .card-block{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09)}
+.tpl-dark .blk-title{color:#e2e8f0}
+.tpl-dark .bio-text{color:#cbd5e1}
+.tpl-dark .info-list{background:transparent;box-shadow:none;margin-bottom:0}
+.tpl-dark .info-list li{border-bottom:1px solid rgba(255,255,255,.08)}
+.tpl-dark .il-icon{background:var(--c1-faint);color:var(--c1-light)}
+.tpl-dark .il-label{color:#94a3b8}
+.tpl-dark .il-value{color:#f1f5f9}
+.tpl-dark .il-arrow{color:#64748b}
+.tpl-dark .socials-row{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09)}
+.tpl-dark .map-frame{border:1px solid rgba(255,255,255,.15)}
+.tpl-dark .map-open{color:var(--c1-light)}
+.tpl-dark .share-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:#e2e8f0}
+.tpl-dark .share-btn:hover{border-color:var(--c1);color:#fff}
+.tpl-dark .card-foot{color:#64748b}
+
+/* ==========================================================================
+   قالب: مینیمال  —  تایپوگرافی‌محور، بدون جعبه، خلوت و تمیز
+   ========================================================================== */
+.card-page.tpl-minimal{background:#fafafa;color:#111}
+.tpl-minimal .minimal-head{text-align:center;padding:0 20px 6px}
+.tpl-minimal .card-cover{height:150px;background:linear-gradient(135deg,var(--c1-soft),var(--c2-soft));margin:0 -20px}
+.tpl-minimal .minimal-id{display:flex;margin-top:-46px}
+.tpl-minimal .minimal-id.logo-center{flex-direction:column;align-items:center;text-align:center}
+.tpl-minimal .minimal-id.logo-right{flex-direction:row;align-items:center;gap:14px;text-align:start}
+.tpl-minimal .minimal-id.logo-left{flex-direction:row-reverse;align-items:center;gap:14px;text-align:end}
+.tpl-minimal .card-logo{width:84px;height:84px;border-radius:50%;border:3px solid #fff;box-shadow:0 6px 18px rgba(0,0,0,.12)}
+.tpl-minimal .minimal-head .id-text{min-width:0}
+.tpl-minimal .minimal-head .name{font-size:24px;letter-spacing:.2px}
+.tpl-minimal .minimal-head .role{color:#71717a;margin-top:4px}
+.tpl-minimal .minimal-head .company{color:#a1a1aa;margin-top:2px}
+.tpl-minimal .minimal-line{width:48px;height:2px;background:var(--c1);display:block;margin:18px auto 0}
+.tpl-minimal .save-btn{background:#fff;border:1.5px solid var(--c1);color:var(--c1);border-radius:10px}
+.tpl-minimal .save-btn:hover{background:var(--c1);color:#fff}
+.tpl-minimal .act-btn{background:#f4f4f5;border:1px solid #f4f4f5;color:#18181b;border-radius:10px}
+.tpl-minimal .act-btn:hover{background:#ececec;border-color:var(--c1);color:var(--c1)}
+.tpl-minimal .card-block{background:#fff;border:1px solid #ececec;border-radius:10px}
+.tpl-minimal .blk-title{color:#18181b}
+.tpl-minimal .bio-text{color:#3f3f46}
+.tpl-minimal .info-list{background:#fff;border:1px solid #ececec;border-radius:10px;padding:2px 16px}
+.tpl-minimal .info-list li{border-bottom:1px solid #f0f0f0}
+.tpl-minimal .il-icon{background:transparent;color:#18181b}
+.tpl-minimal .il-label{color:#a1a1aa}
+.tpl-minimal .il-value{color:#18181b}
+.tpl-minimal .il-arrow{color:#d4d4d8}
+.tpl-minimal .socials-row{background:transparent;padding:2px 0}
+.tpl-minimal .soc-btn{border-radius:50%;background:#f4f4f5;color:#18181b}
+.tpl-minimal .soc-btn:hover{background:var(--c1);color:#fff}
+.tpl-minimal .map-frame{border:1px solid #ececec;border-radius:10px}
+.tpl-minimal .map-open{color:var(--c1)}
+.tpl-minimal .share-btn{background:#f4f4f5;border:1px solid #f4f4f5;color:#18181b;border-radius:50%}
+.tpl-minimal .share-btn:hover{background:var(--c1);color:#fff}
+.tpl-minimal .card-foot{color:#a1a1aa}
+
+/* ==========================================================================
+   قالب: گرادیانی  —  تمام‌صفحه رنگی، هیروی سفید، کارت‌های شناور
+   ========================================================================== */
+.card-page.tpl-gradient{background:var(--grad)}
+.tpl-gradient .gradient-hero{position:relative;overflow:hidden;text-align:center;padding:0 20px 18px}
+.tpl-gradient .card-cover{height:150px;background:transparent;margin:0 -20px}
+.tpl-gradient .gradient-orb{position:absolute;border-radius:50%;background:rgba(255,255,255,.14);filter:blur(2px);pointer-events:none}
+.tpl-gradient .o1{width:220px;height:220px;top:-80px;right:-70px}
+.tpl-gradient .o2{width:170px;height:170px;bottom:-60px;left:-60px}
+.tpl-gradient .card-id{display:flex;position:relative}
+.tpl-gradient .card-id.logo-center{flex-direction:column;align-items:center;text-align:center}
+.tpl-gradient .card-id.logo-right{flex-direction:row;align-items:center;gap:16px}
+.tpl-gradient .card-id.logo-left{flex-direction:row-reverse;align-items:center;gap:16px}
+.tpl-gradient .card-logo{width:104px;height:104px;border-radius:50%;border:3px solid rgba(255,255,255,.85);box-shadow:0 12px 30px rgba(0,0,0,.3)}
+.tpl-gradient .card-logo-ph{background:rgba(255,255,255,.25);border:3px solid rgba(255,255,255,.85);color:#fff}
+.tpl-gradient .id-text{text-align:center}
+.tpl-gradient .name{font-size:25px;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.25)}
+.tpl-gradient .role{color:rgba(255,255,255,.9);font-weight:600}
+.tpl-gradient .company{color:rgba(255,255,255,.78)}
+.tpl-gradient .save-btn{background:#fff;color:var(--c1);box-shadow:0 10px 26px rgba(0,0,0,.25)}
+.tpl-gradient .save-btn:hover{transform:translateY(-2px)}
+.tpl-gradient .act-btn{background:rgba(255,255,255,.94);border:1px solid rgba(255,255,255,.9);color:#334155}
+.tpl-gradient .act-btn:hover{border-color:#fff;color:var(--c1)}
+.tpl-gradient .float-card{background:rgba(255,255,255,.95);border-radius:18px;padding:6px 14px;margin-bottom:14px;box-shadow:0 14px 34px rgba(0,0,0,.18)}
+.tpl-gradient .card-block{background:rgba(255,255,255,.95);box-shadow:0 14px 34px rgba(0,0,0,.18)}
+.tpl-gradient .blk-title{color:#334155}
+.tpl-gradient .bio-text{color:#475569}
+.tpl-gradient .info-list{background:transparent;box-shadow:none;margin-bottom:0}
+.tpl-gradient .info-list li{border-bottom:1px solid #f1f5f9}
+.tpl-gradient .il-icon{background:var(--c1-soft);color:var(--c1)}
+.tpl-gradient .il-label{color:#94a3b8}
+.tpl-gradient .il-value{color:#1e293b}
+.tpl-gradient .il-arrow{color:#cbd5e1}
+.tpl-gradient .socials-row{background:rgba(255,255,255,.95);box-shadow:0 14px 34px rgba(0,0,0,.18)}
+.tpl-gradient .map-frame{border:1px solid #e2e8f0}
+.tpl-gradient .map-open{color:var(--c1)}
+.tpl-gradient .share-btn{background:rgba(255,255,255,.95);border:1px solid rgba(255,255,255,.9);color:#475569}
+.tpl-gradient .share-btn:hover{color:var(--c1)}
+.tpl-gradient .card-foot{color:rgba(255,255,255,.8)}
+
+/* ==========================================================================
+   قالب: بیزینسی  —  کارت کاغذی لوکس، قاب طلایی، گوشه‌های تزئینی
+   ========================================================================== */
+.card-page.tpl-business{background:#f3ecdf;color:#3f3314}
+.tpl-business .card-shell{background:#fffdf6;border:1.5px solid var(--c1-cream);border-radius:22px;margin-top:18px;box-shadow:0 18px 40px rgba(120,90,20,.16);padding-bottom:6px;overflow:hidden}
+.tpl-business .business-head{position:relative;text-align:center;padding:0 20px}
+.tpl-business .card-cover{height:110px;background:linear-gradient(135deg,var(--c1-soft),var(--c2-soft));margin:0 -20px}
+.tpl-business .biz-corner{position:absolute;width:26px;height:26px;border:2px solid var(--c1);opacity:.9;z-index:2}
+.tpl-business .c-tl{top:14px;right:14px;border-left:none;border-bottom:none;border-radius:6px 0 0 0}
+.tpl-business .c-tr{top:14px;left:14px;border-right:none;border-bottom:none;border-radius:0 6px 0 0}
+.tpl-business .c-bl{bottom:14px;right:14px;border-left:none;border-top:none;border-radius:0 0 0 6px}
+.tpl-business .c-br{bottom:14px;left:14px;border-right:none;border-top:none;border-radius:0 0 6px 0}
+.tpl-business .biz-id{display:flex}
+.tpl-business .biz-id.logo-center{flex-direction:column;align-items:center;text-align:center}
+.tpl-business .biz-id.logo-right{flex-direction:row;align-items:center;justify-content:center;gap:18px;text-align:start}
+.tpl-business .biz-id.logo-left{flex-direction:row-reverse;align-items:center;justify-content:center;gap:18px;text-align:end}
+.tpl-business .card-logo{width:80px;height:80px;border-radius:50%;border:3px solid #fffdf6;box-shadow:0 8px 20px rgba(120,90,20,.25)}
+.tpl-business .name{font-size:22px;color:#4a3a10;font-weight:900}
+.tpl-business .role{color:var(--c1);font-weight:700}
+.tpl-business .company{color:#6b5830}
+.tpl-business .minimal-line{width:64px;height:2px;background:linear-gradient(90deg,transparent,var(--c1),transparent);display:block;margin:18px auto 0}
+.tpl-business .save-btn{background:var(--grad);color:#fff;box-shadow:0 10px 24px var(--c1-glow);border-radius:12px}
+.tpl-business .save-btn:hover{box-shadow:0 13px 30px var(--c1-glow)}
+.tpl-business .act-btn{border:1px solid var(--c1-cream);background:#fffdf6;color:#4a3a10}
+.tpl-business .act-btn:hover{border-color:var(--c1);color:var(--c1)}
+.tpl-business .card-block{background:#fffdf6;box-shadow:none;border:1px solid #efe3c0;border-radius:14px}
+.tpl-business .blk-title{color:#4a3a10}
+.tpl-business .bio-text{color:#5c4a22}
+.tpl-business .float-card{background:#fffdf6;box-shadow:none;border:1px solid #efe3c0;border-radius:14px;padding:6px 14px;margin-bottom:14px}
+.tpl-business .info-list{background:transparent;box-shadow:none;margin-bottom:0}
+.tpl-business .info-list li{border-bottom:1px solid #f1e6c8}
+.tpl-business .il-icon{background:var(--c1-soft);color:var(--c1)}
+.tpl-business .il-label{color:#a08a4f}
+.tpl-business .il-value{color:#3f3314}
+.tpl-business .il-arrow{color:#d8c591}
+.tpl-business .socials-row{background:#fffdf6;box-shadow:none;border:1px solid #efe3c0;border-radius:14px}
+.tpl-business .map-frame{border:1px solid #efe3c0}
+.tpl-business .map-open{color:var(--c1)}
+.tpl-business .share-btn{background:#fffdf6;border:1px solid var(--c1-cream);color:#6b5830}
+.tpl-business .share-btn:hover{border-color:var(--c1);color:var(--c1)}
+.tpl-business .card-foot{color:#a08a4f}
+
+/* ==========================================================================
+   قالب: نئونی  —  سایبر، شیشه تاریک، درخشش
+   ========================================================================== */
+.card-page.tpl-neon{background:#07080f;color:#e2e8f0}
+.tpl-neon .neon-bg{position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(620px 420px at 82% 8%,var(--c1-glow),transparent 60%),radial-gradient(520px 400px at 8% 92%,var(--c2-glow),transparent 60%),radial-gradient(420px 320px at 50% 55%,var(--c1-haze),transparent 60%)}
+.tpl-neon .card-shell{position:relative;z-index:1}
+.tpl-neon .neon-head{position:relative;text-align:center;padding:0 20px 10px}
+.tpl-neon .card-cover{height:150px;background:linear-gradient(135deg,var(--c1-faint),var(--c2-faint));margin:0 -20px}
+.tpl-neon .neon-logo{display:flex}
+.tpl-neon .neon-logo.logo-center{justify-content:center}
+.tpl-neon .neon-logo.logo-right{justify-content:flex-start}
+.tpl-neon .neon-logo.logo-left{justify-content:flex-end}
+.tpl-neon .card-logo{width:100px;height:100px;border-radius:50%;border:2px solid var(--c1-bright);box-shadow:0 0 0 6px var(--c1-faint),0 0 30px var(--c1-glow)}
+.tpl-neon .neon-name{margin-top:20px;font-size:25px;font-weight:900;background:linear-gradient(90deg,var(--c1),var(--c2),var(--c2-light));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 16px var(--c1-glow))}
+.tpl-neon .role{color:#9ca3af}
+.tpl-neon .company{color:#7d8396}
+.tpl-neon .save-btn{background:linear-gradient(90deg,var(--c1),var(--c2));color:#fff;box-shadow:0 8px 28px var(--c2-glow)}
+.tpl-neon .save-btn:hover{box-shadow:0 10px 34px var(--c2-glow);transform:translateY(-1px)}
+.tpl-neon .act-btn{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);color:#e2e8f0}
+.tpl-neon .act-btn:hover{border-color:var(--c1-light);color:var(--c1-light);box-shadow:0 0 16px var(--c1-glow);transform:translateY(-1px)}
+.tpl-neon .glass{background:rgba(255,255,255,.04);border:1px solid var(--c1-glow);border-radius:16px;padding:6px 14px;margin-bottom:14px;box-shadow:0 0 22px var(--c1-faint)}
+.tpl-neon .card-block{background:rgba(255,255,255,.04);border:1px solid var(--c1-glow);box-shadow:0 0 22px var(--c1-faint)}
+.tpl-neon .blk-title{color:#e9d5ff}
+.tpl-neon .bio-text{color:#cbd5e1}
+.tpl-neon .info-list{background:transparent;box-shadow:none;margin-bottom:0}
+.tpl-neon .info-list li{border-bottom:1px solid rgba(255,255,255,.07)}
+.tpl-neon .il-icon{background:var(--c2-faint);color:var(--c2-light)}
+.tpl-neon .il-label{color:#8b8fa3}
+.tpl-neon .il-value{color:#f1f5f9}
+.tpl-neon .il-arrow{color:#5c6074}
+.tpl-neon .socials-row{background:rgba(255,255,255,.04);border:1px solid var(--c1-glow);box-shadow:0 0 22px var(--c1-faint)}
+.tpl-neon .map-frame{border:1px solid var(--c1-glow)}
+.tpl-neon .map-open{color:var(--c1-light)}
+.tpl-neon .share-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:#e2e8f0}
+.tpl-neon .share-btn:hover{border-color:var(--c1);color:var(--c1-light);box-shadow:0 0 14px var(--c1-glow)}
+.tpl-neon .card-foot{color:#5c6074}
+
+/* ---------- گوشه‌ی مشترک: در تم‌های تیره جعبه QR همیشه روشن بماند ---------- */
+.tpl-dark .qr-inner,.tpl-neon .qr-inner{background:#fff;border:1px solid rgba(255,255,255,.15)}
