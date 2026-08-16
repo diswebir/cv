@@ -164,7 +164,7 @@ function admin_settings() {
     $error = '';
     $saved = false;
     $detected = rtrim(
-        ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https') ? 'https' : 'http')
+        (is_https() ? 'https' : 'http')
         . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . path_prefix(),
         '/'
     );

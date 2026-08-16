@@ -480,3 +480,73 @@ b,strong{font-weight:700}
 .mini-switch input:checked + .ms-track{background:var(--p1)}
 .mini-switch input:checked + .ms-track::after{transform:translateX(-19px)}
 .mini-switch input:focus-visible + .ms-track{outline:2px solid var(--p1);outline-offset:2px}
+
+/* ==========================================================================
+   Accessibility & UX improvements
+   ========================================================================== */
+
+/* Skip-to-content link for keyboard users */
+.skip-link{position:absolute;top:-100px;right:16px;z-index:300;background:#fff;color:var(--p1);padding:10px 18px;border-radius:0 0 12px 12px;box-shadow:var(--shadow-lg);font-weight:700;font-size:14px;transition:top .15s}
+.skip-link:focus{top:0;outline:3px solid var(--p1);outline-offset:2px}
+
+/* Global focus-visible for keyboard navigation */
+a:focus-visible,button:focus-visible,.btn:focus-visible,.icon-btn:focus-visible,
+input:focus-visible,textarea:focus-visible,select:focus-visible,
+.side-link:focus-visible,.et:focus-visible,.pg:focus-visible,
+.theme-item:focus-within .tpl-ph,.pos-item:focus-within .pos-thumb,
+.dot-item:focus-within img,.qr-theme-item:focus-within img{
+  outline:2px solid var(--p1);outline-offset:2px;border-radius:8px;
+}
+.icon-btn:focus-visible{outline:2px solid var(--p1);outline-offset:2px}
+
+/* Toast: live region for screen readers */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(120%);
+  background:#1e293b;color:#fff;padding:11px 20px;border-radius:12px;font-size:13.5px;font-weight:600;
+  box-shadow:var(--shadow-lg);z-index:250;opacity:0;transition:.25s;max-width:90vw;text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+/* Password strength meter */
+.pass-strength{height:5px;border-radius:99px;background:#e2e8f0;margin-top:8px;overflow:hidden}
+.pass-strength-bar{height:100%;width:0;border-radius:99px;transition:width .25s,background .25s}
+.pass-strength-text{font-size:11.5px;color:var(--muted);margin-top:4px;min-height:16px}
+
+/* Lightbox for card images */
+.lightbox-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.85);z-index:300;display:flex;align-items:center;justify-content:center;padding:24px;animation:vcFade .15s ease}
+.lightbox-backdrop img{max-width:92vw;max-height:88vh;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.5);object-fit:contain}
+.lightbox-close{position:absolute;top:16px;left:16px;width:40px;height:40px;border-radius:50%;border:none;background:rgba(255,255,255,.15);color:#fff;cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;transition:.15s}
+.lightbox-close:hover{background:rgba(255,255,255,.3)}
+
+/* Share modal (richer than just copy) */
+.share-modal{max-width:380px;text-align:center}
+.share-modal .share-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:18px 0}
+.share-modal .share-opt{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 8px;border:1.5px solid var(--line);border-radius:14px;cursor:pointer;transition:.15s;font-size:12.5px;font-weight:600;color:#334155}
+.share-modal .share-opt:hover{border-color:var(--p1);background:#f5f3ff}
+.share-modal .share-opt svg{color:var(--p1)}
+
+/* Editor: always-visible save bar */
+.editor-save-bar{position:sticky;bottom:0;left:0;right:0;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-top:1px solid var(--line);padding:12px 18px;display:flex;gap:10px;align-items:center;z-index:20;margin:18px -24px -24px;padding:12px 24px}
+.editor-save-bar .saved-hint{font-size:12px;color:var(--muted);margin-right:auto}
+.editor-save-bar .btn{flex-shrink:0}
+
+/* Live card preview */
+.preview-iframe{width:100%;height:520px;border:1.5px solid var(--line);border-radius:14px;background:#eef1f6}
+
+/* "Remember me" checkbox */
+.remember-line{display:flex;align-items:center;gap:9px;font-size:13px;margin-bottom:16px}
+.remember-line input{width:18px;height:18px;accent-color:var(--p1);flex-shrink:0}
+.remember-line label{cursor:pointer;color:#475569}
+
+/* Tab role improvements (ARIA tabs) */
+.editor-tabs[role="tablist"] .et[role="tab"]{}
+.editor-tabs[role="tablist"] .et[role="tab"][aria-selected="true"]{background:var(--grad);color:#fff}
+
+/* Responsive reset-box on small screens */
+@media(max-width:560px){
+  .reset-form{position:fixed;left:16px;right:16px;top:auto;bottom:16px;width:auto}
+}
+
+/* Consistent spacing for etab blocks */
+.etab{padding:24px}
+
+/* Focus trap helper for modals */
+.modal-backdrop:focus-within{outline:none}

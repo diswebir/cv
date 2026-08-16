@@ -9,7 +9,9 @@
 
 session_start();
 error_reporting(E_ALL);
-ini_set('display_errors', '1');
+// Security: never expose internal errors to the browser — log instead.
+ini_set('display_errors', '0');
+ini_set('log_errors', '1');
 define('VC_ROOT', __DIR__);
 define('CONFIG_PATH', VC_ROOT . '/includes/config.php');
 define('INSTALLED_FLAG', VC_ROOT . '/includes/.installed');
@@ -31,7 +33,7 @@ if (!function_exists('ie')) {
         return strtr((string)$s, array('0'=>'۰','1'=>'۱','2'=>'۲','3'=>'۳','4'=>'۴','5'=>'۵','6'=>'۶','7'=>'۷','8'=>'۸','9'=>'۹'));
     }
     function detect_base_url() {
-        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https') ? 'https' : 'http';
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
         $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
         $dir = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '')), '/');
         if ($dir === '.' || $dir === '/') $dir = '';
@@ -214,7 +216,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     exit;
                 }
             } catch (Exception $e) {
-                $error = 'خطا در ذخیره‌سازی حساب مدیر: ' . $e->getMessage();
+                $error = 'خطا در ذخیره‌سازی حساب مدیر رخ داد. لطفاً مجدداً تلاش کنید یا با پشتیبانی تماس بگیرید.';
             }
         }
     } elseif (ipost('action') === 'step4') {

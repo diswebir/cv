@@ -6,10 +6,12 @@ document.addEventListener('DOMContentLoaded', function () {
   if (menuBtn && sidebar) {
     function closeSide() {
       sidebar.classList.remove('open');
+      menuBtn.setAttribute('aria-expanded', 'false');
       if (backdrop) backdrop.classList.remove('show');
     }
     menuBtn.addEventListener('click', function () {
       sidebar.classList.add('open');
+      menuBtn.setAttribute('aria-expanded', 'true');
       if (backdrop) backdrop.classList.add('show');
     });
     if (backdrop) backdrop.addEventListener('click', closeSide);
@@ -24,6 +26,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!toastEl) {
       toastEl = document.createElement('div');
       toastEl.className = 'toast';
+      toastEl.setAttribute('role', 'status');
+      toastEl.setAttribute('aria-live', 'polite');
       document.body.appendChild(toastEl);
     }
     toastEl.textContent = msg;
@@ -70,14 +74,18 @@ document.addEventListener('DOMContentLoaded', function () {
   window.vcConfirm = function (message, onYes, onNo) {
     var backdrop = document.createElement('div');
     backdrop.className = 'modal-backdrop';
+    // Security: build the DOM shell with innerHTML (static markup) but inject the
+    // message via textContent to prevent XSS if a dynamic message is ever passed.
     backdrop.innerHTML =
       '<div class="modal-card">' +
       '<div class="modal-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 8v5m0 3.5v.5M10.3 3.9 2.3 18a2 2 0 0 0 1.7 3h16a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' +
-      '<h3>تأیید</h3><p>' + message + '</p>' +
+      '<h3>تأیید</h3><p></p>' +
       '<div class="modal-actions">' +
       '<button type="button" class="btn btn-danger js-modal-no">انصراف</button>' +
       '<button type="button" class="btn btn-primary js-modal-yes">تأیید</button>' +
       '</div></div>';
+    var msgEl = backdrop.querySelector('p');
+    if (msgEl) msgEl.textContent = message;
     function close() { backdrop.remove(); }
     backdrop.querySelector('.js-modal-no').addEventListener('click', function () { close(); if (onNo) onNo(); });
     backdrop.querySelector('.js-modal-yes').addEventListener('click', function () { close(); if (onYes) onYes(); });
@@ -116,6 +124,65 @@ document.addEventListener('DOMContentLoaded', function () {
   document.addEventListener('submit', function (e) {
     var form = e.target;
     var msg = form.getAttribute('data-confirm');
-    if (msg && !window.confirm(msg)) e.preventDefault();
+    if (!msg) return;
+    if (form.getAttribute('data-confirming') === '1') { form.removeAttribute('data-confirming'); return; }
+    e.preventDefault();
+    vcConfirm(msg, function () {
+      form.setAttribute('data-confirming', '1');
+      form.submit();
+    });
   });
 });
+
+  // ---------- lightbox for images ----------
+  document.addEventListener('click', function (e) {
+    var trigger = e.target.closest('[data-lightbox]');
+    if (!trigger) return;
+    var src = trigger.getAttribute('data-lightbox');
+    if (!src) return;
+    var box = document.createElement('div');
+    box.className = 'lightbox-backdrop';
+    box.innerHTML = '<button class="lightbox-close" aria-label="بستن">×</button><img src="' + src + '" alt="">';
+    function closeLb() { box.remove(); }
+    box.querySelector('.lightbox-close').addEventListener('click', closeLb);
+    box.addEventListener('click', function (ev) { if (ev.target === box) closeLb(); });
+    document.addEventListener('keydown', function esc(ev) {
+      if (ev.key === 'Escape') { closeLb(); document.removeEventListener('keydown', esc); }
+    });
+    document.body.appendChild(box);
+  });
+
+  // ---------- password strength meter ----------
+  document.querySelectorAll('[data-strength]').forEach(function (inp) {
+    var barSel = inp.getAttribute('data-strength-bar');
+    var txtSel = inp.getAttribute('data-strength-text');
+    var bar = barSel ? document.querySelector(barSel) : null;
+    var txt = txtSel ? document.querySelector(txtSel) : null;
+    if (!bar && !txt) return;
+    inp.addEventListener('input', function () {
+      var v = inp.value;
+      var score = 0;
+      if (v.length >= 6) score++;
+      if (v.length >= 10) score++;
+      if (/[a-z]/.test(v) && /[A-Z]/.test(v)) score++;
+      if (/\d/.test(v)) score++;
+      if (/[^A-Za-z0-9]/.test(v)) score++;
+      var labels = ['خیلی ضعیف', 'ضعیف', 'متوسط', 'خوب', 'قوی', 'عالی'];
+      var colors = ['#ef4444', '#ef4444', '#f59e0b', '#eab308', '#22c55e', '#16a34a'];
+      var pct = v === '' ? 0 : Math.max(10, (score / 5) * 100);
+      if (bar) { bar.style.width = pct + '%'; bar.style.background = colors[score]; }
+      if (txt) txt.textContent = v === '' ? '' : labels[score];
+    });
+  });
+
+  // ---------- beforeunload guard for card editor ----------
+  var guardForm = document.getElementById('cardForm');
+  if (guardForm) {
+    var dirty = false;
+    guardForm.addEventListener('input', function () { dirty = true; });
+    guardForm.addEventListener('change', function () { dirty = true; });
+    guardForm.addEventListener('submit', function () { dirty = false; });
+    window.addEventListener('beforeunload', function (e) {
+      if (dirty) { e.preventDefault(); e.returnValue = ''; }
+    });
+  }

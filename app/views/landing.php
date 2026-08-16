@@ -8,11 +8,19 @@
         <a class="btn btn-lg btn-primary" href="<?= e(base_url('register')) ?>">شروع رایگان</a>
         <a class="btn btn-lg btn-ghost" href="<?= e(base_url('login')) ?>">ورود به حساب</a>
       </div>
+      <?php if ((int)$stats['cards'] > 0 || (int)$stats['visits'] > 0): ?>
       <div class="hero-stats">
         <div class="hs-item"><strong><?= fa_num_format($stats['cards']) ?></strong><span>کارت ساخته شده</span></div>
         <div class="hs-item"><strong><?= fa_num_format($stats['users']) ?></strong><span>کاربر فعال</span></div>
         <div class="hs-item"><strong><?= fa_num_format($stats['visits']) ?></strong><span>بازدید ثبت شده</span></div>
       </div>
+      <?php else: ?>
+      <div class="hero-stats">
+        <div class="hs-item"><strong>رایگان</strong><span>بدون نیاز به SSL یا SSH</span></div>
+        <div class="hs-item"><strong>۶ قالب</strong><span>حرفه‌ای و قابل‌سفارشی</span></div>
+        <div class="hs-item"><strong>۱۸+ تم</strong><span>کد QR اختصاصی</span></div>
+      </div>
+      <?php endif; ?>
     </div>
     <div class="hero-visual">
       <div class="phone-mock">

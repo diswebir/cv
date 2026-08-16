@@ -22,15 +22,15 @@ $qrUrl = base_url('qr/_.png');
 $demoData = 'https://example.com';
 ?>
 <div class="editor-wrap">
-  <div class="editor-tabs" id="editorTabs">
-    <button type="button" class="et on" data-tab="info">اطلاعات</button>
-    <button type="button" class="et" data-tab="contact">تماس</button>
-    <button type="button" class="et" data-tab="photos">تصاویر</button>
-    <button type="button" class="et" data-tab="social">شبکه‌ها</button>
-    <button type="button" class="et" data-tab="location">لوکیشن</button>
-    <button type="button" class="et" data-tab="custom">فیلدها</button>
-    <button type="button" class="et" data-tab="design">طراحی</button>
-    <button type="button" class="et" data-tab="qr">کد QR</button>
+  <div class="editor-tabs" id="editorTabs" role="tablist" aria-label="بخش‌های ویرایشگر کارت">
+    <button type="button" class="et on" role="tab" id="tab-info" aria-selected="true" aria-controls="panel-info" tabindex="0" data-tab="info">اطلاعات</button>
+    <button type="button" class="et" role="tab" aria-selected="false" tabindex="0" data-tab="contact">تماس</button>
+    <button type="button" class="et" role="tab" aria-selected="false" tabindex="0" data-tab="photos">تصاویر</button>
+    <button type="button" class="et" role="tab" aria-selected="false" tabindex="0" data-tab="social">شبکه‌ها</button>
+    <button type="button" class="et" role="tab" aria-selected="false" tabindex="0" data-tab="location">لوکیشن</button>
+    <button type="button" class="et" role="tab" aria-selected="false" tabindex="0" data-tab="custom">فیلدها</button>
+    <button type="button" class="et" role="tab" aria-selected="false" tabindex="0" data-tab="design">طراحی</button>
+    <button type="button" class="et" role="tab" aria-selected="false" tabindex="0" data-tab="qr">کد QR</button>
   </div>
 
   <?php if ($error): ?><div class="alert alert-error"><?= e($error) ?></div><?php endif; ?>
@@ -40,7 +40,7 @@ $demoData = 'https://example.com';
     <?php if (!$card): ?><input type="hidden" name="code" value="<?= e($preCode) ?>"><?php endif; ?>
 
     <!-- ===== اطلاعات ===== -->
-    <div class="etab" data-panel="info">
+    <div class="etab" data-panel="info" role="tabpanel" aria-labelledby="tab-info" tabindex="0">
       <div class="etab-head"><h3>اطلاعات اصلی</h3><p>نام و مشخصات شغلی که روی کارت نمایش داده می‌شود.</p></div>
       <div class="form-grid">
         <div class="field span2"><label>نام و نام خانوادگی *</label><input type="text" name="full_name" value="<?= e(fval($card, 'full_name')) ?>" placeholder="مثلاً رامین احمدی" required></div>
@@ -226,11 +226,11 @@ $demoData = 'https://example.com';
       </div>
     </div>
 
-    <div class="form-actions">
+    <div class="editor-save-bar">
       <button type="button" class="btn btn-lg btn-ghost" id="formPrevBtn" hidden>قبلی</button>
       <button type="button" class="btn btn-lg btn-primary" id="formNextBtn">بعدی</button>
-      <button type="submit" class="btn btn-lg btn-primary" id="formSaveBtn" hidden><?= $card ? 'ذخیره تغییرات' : 'ساخت کارت' ?></button>
-      <span class="fa-grow"></span>
+      <span class="saved-hint">تغییرات ذخیره نشده دارید — برای اعمال، دکمه ذخیره را بزنید.</span>
+      <button type="submit" class="btn btn-lg btn-primary" id="formSaveBtn"><?= $card ? 'ذخیره تغییرات' : 'ساخت کارت' ?></button>
       <a class="btn btn-lg btn-ghost" href="<?= e(base_url('panel')) ?>">انصراف</a>
     </div>
   </form>

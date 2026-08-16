@@ -5,11 +5,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title><?= e($pageTitle) ?></title>
-<meta name="theme-color" content="#6366f1">
+<meta name="theme-color" content="<?= e((string)get_setting('theme_color', '#6366f1')) ?>">
 <link rel="icon" type="image/svg+xml" href="<?= e(asset('img/favicon.svg')) ?>">
 <link rel="stylesheet" href="<?= e(asset('css/style.css')) ?>">
 </head>
 <body class="page-panel">
+<a class="skip-link" href="#panelMain">پرش به محتوای اصلی</a>
 <div class="panel-shell">
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
   <aside class="sidebar" id="sidebar">
@@ -17,7 +18,7 @@
       <span class="brand-logo"><?= icon_svg('card'); ?></span>
       <span class="brand-name"><?= e($siteName) ?></span>
     </a>
-    <nav class="side-nav">
+    <nav class="side-nav" aria-label="منوی پنل">
       <a class="side-link <?= $active === 'dashboard' ? 'on' : '' ?>" href="<?= e(base_url('panel')) ?>"><?= icon_svg('dashboard', 18); ?><span>داشبورد</span></a>
       <a class="side-link <?= $active === 'cards' ? 'on' : '' ?>" href="<?= e(base_url('panel')) ?>#cards"><?= icon_svg('cards', 18); ?><span>کارت‌های من</span></a>
       <a class="side-link side-link-accent" href="<?= e(base_url('panel/card/new')) ?>"><?= icon_svg('plus', 18); ?><span>کارت جدید</span></a>
@@ -43,9 +44,9 @@
     </div>
   </aside>
 
-  <div class="panel-main">
+  <div class="panel-main" id="panelMain">
     <header class="panel-topbar">
-      <button class="icon-btn menu-btn" id="menuBtn" aria-label="منو"><?= icon_svg('menu', 20); ?></button>
+      <button class="icon-btn menu-btn" id="menuBtn" aria-label="باز کردن منوی کناری" aria-expanded="false" aria-controls="sidebar"><?= icon_svg('menu', 20); ?></button>
       <h1 class="panel-title"><?= e($pageTitle) ?></h1>
     </header>
     <div class="panel-content container">

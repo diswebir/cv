@@ -26,6 +26,16 @@ function is_admin() {
 function require_login() {
     if (!current_user()) {
         flash('برای ادامه‌ی کار ابتدا وارد حساب خود شوید.', 'error');
+        // Preserve the intended destination so we can return after login.
+        $req = trim((string)($_SERVER['REQUEST_URI'] ?? ''), '/');
+        $qpos = strpos($req, '?');
+        if ($qpos !== false) $req = substr($req, 0, $qpos);
+        // Strip the app path prefix so redirect() builds a clean URL.
+        $prefix = path_prefix();
+        if ($prefix !== '' && strpos($req, $prefix) === 0) $req = ltrim(substr($req, strlen($prefix)), '/');
+        if ($req !== '' && $req !== 'login' && preg_match('#^[a-zA-Z0-9_\-/]{1,120}$#', $req)) {
+            redirect('login?next=' . $req);
+        }
         redirect('login');
     }
 }
@@ -36,32 +46,28 @@ function require_admin() {
     }
 }
 
-function login_fail_key($email, $byIp = false) {
-    return $byIp ? 'login_fail_ip_' . md5(client_ip()) : 'login_fail_' . md5(strtolower($email));
-}
-
+/**
+ * Login throttling uses the file-based rate limiter (helpers.php) so that
+ * attackers cannot bypass it by discarding their session cookie. We track two
+ * buckets per attempt: one keyed by email (account protection) and one keyed
+ * by IP (protection against distributed guessing from a single source).
+ */
 function login_rate_limited($email) {
-    foreach (array(login_fail_key($email), login_fail_key($email, true)) as $key) {
-        if (empty($_SESSION[$key])) continue;
-        $info = $_SESSION[$key];
-        if ($info['count'] >= 5 && (time() - $info['time']) < 900) return true;
-        if ((time() - $info['time']) >= 900) unset($_SESSION[$key]);
-    }
+    $ip = client_ip();
+    if (rate_limit_blocked('login_ip_' . md5($ip), 'x', 10, 900)) return true;
+    if (rate_limit_blocked('login_email_' . md5(strtolower((string)$email)), 'x', 5, 900)) return true;
     return false;
 }
 
 function login_rate_fail($email) {
-    foreach (array(login_fail_key($email), login_fail_key($email, true)) as $key) {
-        $info = $_SESSION[$key] ?? array('count' => 0, 'time' => time());
-        $info['count']++;
-        $info['time'] = time();
-        $_SESSION[$key] = $info;
-    }
+    // Record a failed attempt for both the IP and the email buckets.
+    rate_limit_hit('login_ip_' . md5(client_ip()), 'x', 10, 900);
+    rate_limit_hit('login_email_' . md5(strtolower((string)$email)), 'x', 5, 900);
 }
 
 function login_rate_reset($email) {
-    unset($_SESSION[login_fail_key($email)]);
-    unset($_SESSION[login_fail_key($email, true)]);
+    rate_limit_reset('login_ip_' . md5(client_ip()), 'x');
+    rate_limit_reset('login_email_' . md5(strtolower((string)$email)), 'x');
 }
 
 function attempt_login($email, $password) {
@@ -99,7 +105,7 @@ function register_user($name, $email, $password) {
     $email = strtolower(trim((string)$email));
     if ($name === '') return array('ok' => false, 'error' => 'نام را وارد کنید.');
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) return array('ok' => false, 'error' => 'ایمیل معتبر نیست.');
-    if (mb_strlen($password) < 6) return array('ok' => false, 'error' => 'رمز عبور باید حداقل ۶ کاراکتر باشد.');
+    if (mb_strlen($password) < 6) return array('ok' => false, 'error' => 'رمز عبور باید حداقل ۶ کاراکتر باشد. از ترکیب حروف و عدد استفاده کنید تا امن‌تر باشد.');
     $existing = get_user_by_email($email);
     if ($existing) return array('ok' => false, 'error' => 'این ایمیل قبلاً ثبت شده است.');
     $id = create_user($name, $email, $password, 'user');

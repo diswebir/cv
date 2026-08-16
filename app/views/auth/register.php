@@ -19,13 +19,19 @@
       <div class="field">
         <label for="password">رمز عبور (حداقل ۶ کاراکتر)</label>
         <div class="pass-wrap">
-          <input type="password" id="password" name="password" required placeholder="••••••••" dir="ltr">
+          <input type="password" id="password" name="password" required placeholder="••••••••" dir="ltr"
+            data-strength data-strength-bar="#strengthBar" data-strength-text="#strengthText">
           <button type="button" class="pass-toggle" data-target="password" aria-label="نمایش رمز"><?= icon_svg('eye', 18); ?></button>
         </div>
+        <div class="pass-strength"><div class="pass-strength-bar" id="strengthBar"></div></div>
+        <div class="pass-strength-text" id="strengthText"></div>
       </div>
       <div class="field">
         <label for="password2">تکرار رمز عبور</label>
-        <input type="password" id="password2" name="password2" required placeholder="••••••••" dir="ltr">
+        <div class="pass-wrap">
+          <input type="password" id="password2" name="password2" required placeholder="••••••••" dir="ltr">
+          <button type="button" class="pass-toggle" data-target="password2" aria-label="نمایش رمز"><?= icon_svg('eye', 18); ?></button>
+        </div>
       </div>
       <button type="submit" class="btn btn-primary btn-block btn-lg">ساخت حساب</button>
     </form>

@@ -13,18 +13,25 @@ document.addEventListener('DOMContentLoaded', function () {
   function showTab(idx) {
     if (idx < 0 || idx >= tabs.length) return;
     currentIdx = idx;
-    tabs.forEach(function (t, i) { t.classList.toggle('on', i === idx); });
+    tabs.forEach(function (t, i) {
+      t.classList.toggle('on', i === idx);
+      t.setAttribute('aria-selected', i === idx ? 'true' : 'false');
+    });
     panels.forEach(function (p) { p.hidden = true; });
     var panel = form.querySelector('.etab[data-panel="' + tabs[idx].getAttribute('data-tab') + '"]');
     if (panel) panel.hidden = false;
     var isLast = idx === tabs.length - 1;
     if (nextBtn) nextBtn.hidden = isLast;
-    if (saveBtn) saveBtn.hidden = !isLast;
+    // Save button is always visible in the sticky save bar.
     if (prevBtn) prevBtn.hidden = idx === 0;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
   tabs.forEach(function (tab, i) {
     tab.addEventListener('click', function () { showTab(i); });
+    tab.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowLeft') { showTab(Math.min(tabs.length - 1, i + 1)); tabs[i + 1] && tabs[i + 1].focus(); }
+      if (e.key === 'ArrowRight') { showTab(Math.max(0, i - 1)); tabs[i - 1] && tabs[i - 1].focus(); }
+    });
   });
   if (nextBtn) nextBtn.addEventListener('click', function () {
     if (!form.checkValidity()) { form.reportValidity(); return; }

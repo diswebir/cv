@@ -19,6 +19,10 @@
           <button type="button" class="pass-toggle" data-target="password" aria-label="نمایش رمز"><?= icon_svg('eye', 18); ?></button>
         </div>
       </div>
+      <div class="remember-line">
+        <input type="checkbox" id="remember" name="remember" value="1">
+        <label for="remember">مرا به خاطر بسپار (۳۰ روز)</label>
+      </div>
       <button type="submit" class="btn btn-primary btn-block btn-lg">ورود</button>
     </form>
     <p class="auth-alt">حساب ندارید؟ <a href="<?= e(base_url('register')) ?>">ثبت‌نام کنید</a></p>
