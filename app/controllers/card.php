@@ -101,6 +101,7 @@ function qr_image($segments) {
     $download = get('download') === '1';
 
     header('Cache-Control: public, max-age=86400');
+    header('ETag: "' . md5($text . json_encode($opts) . $fmt) . '"');
     if ($fmt === 'svg') {
         header('Content-Type: image/svg+xml; charset=utf-8');
         if ($download) header('Content-Disposition: attachment; filename="qr-' . $code . '.svg"');

@@ -26,6 +26,16 @@ function is_admin() {
 function require_login() {
     if (!current_user()) {
         flash('برای ادامه‌ی کار ابتدا وارد حساب خود شوید.', 'error');
+        // Preserve the intended destination so we can return after login.
+        $req = trim((string)($_SERVER['REQUEST_URI'] ?? ''), '/');
+        $qpos = strpos($req, '?');
+        if ($qpos !== false) $req = substr($req, 0, $qpos);
+        // Strip the app path prefix so redirect() builds a clean URL.
+        $prefix = path_prefix();
+        if ($prefix !== '' && strpos($req, $prefix) === 0) $req = ltrim(substr($req, strlen($prefix)), '/');
+        if ($req !== '' && $req !== 'login' && preg_match('#^[a-zA-Z0-9_\-/]{1,120}$#', $req)) {
+            redirect('login?next=' . $req);
+        }
         redirect('login');
     }
 }
@@ -95,7 +105,7 @@ function register_user($name, $email, $password) {
     $email = strtolower(trim((string)$email));
     if ($name === '') return array('ok' => false, 'error' => 'نام را وارد کنید.');
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) return array('ok' => false, 'error' => 'ایمیل معتبر نیست.');
-    if (mb_strlen($password) < 6) return array('ok' => false, 'error' => 'رمز عبور باید حداقل ۶ کاراکتر باشد.');
+    if (mb_strlen($password) < 6) return array('ok' => false, 'error' => 'رمز عبور باید حداقل ۶ کاراکتر باشد. از ترکیب حروف و عدد استفاده کنید تا امن‌تر باشد.');
     $existing = get_user_by_email($email);
     if ($existing) return array('ok' => false, 'error' => 'این ایمیل قبلاً ثبت شده است.');
     $id = create_user($name, $email, $password, 'user');

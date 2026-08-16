@@ -159,7 +159,7 @@ function csrf_check() {
     if (!hash_equals(csrf_token(), $t)) {
         // UX: instead of a hard error page, show a flash message and send the
         // user back to the form so their entered data can be re-rendered.
-        flash('جلسه شما منقضی شده است. لطفاً دوباره ارسال کنید.', 'error');
+        flash('برای امنیت، لطفاً دوباره روی دکمه بزنید.', 'error');
         $back = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
         if ($back !== '' && strpos($back, '://') !== false) {
             header('Location: ' . $back);
@@ -311,8 +311,9 @@ function get_page_title() {
 }
 
 function icon_svg($name, $size = 20) {
+    static $paths = null;
     if ($name === 'website') $name = 'globe';
-    $paths = array(
+    if ($paths === null) $paths = array(
         'card' => '<rect x="3" y="5" width="18" height="14" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 9.5h18M7 15h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
         'dashboard' => '<rect x="3" y="3" width="7.5" height="7.5" rx="1.8" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.8" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.8" fill="none" stroke="currentColor" stroke-width="1.8"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.8" fill="none" stroke="currentColor" stroke-width="1.8"/>',
         'cards' => '<path d="M8 6.5h10.5a2 2 0 012 2V18a2 2 0 01-2 2H8a2 2 0 01-2-2V8.5a2 2 0 012-2z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M6 4.5h11M4.5 15V6.5A2.5 2.5 0 017 4h11.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
@@ -372,6 +373,7 @@ function icon_svg($name, $size = 20) {
         'check-circle' => '<circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8.5 12l2.5 2.5 4.5-5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>',
         'image' => '<rect x="3.5" y="4" width="17" height="16" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="9" cy="9.5" r="1.8" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M4.5 17l4.5-4 3 2.7 3.5-3.5 4 3.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>',
     );
+    }
     if (!isset($paths[$name])) $name = 'info';
     return '<svg width="' . $size . '" height="' . $size . '" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' . $paths[$name] . '</svg>';
 }

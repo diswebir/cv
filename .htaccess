@@ -27,3 +27,25 @@ Options -Indexes
     Deny from all
   </IfModule>
 </FilesMatch>
+
+
+# ---------- Performance: cache static assets ----------
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css "access plus 7 days"
+  ExpiresByType application/javascript "access plus 7 days"
+  ExpiresByType image/svg+xml "access plus 30 days"
+  ExpiresByType image/png "access plus 30 days"
+  ExpiresByType image/webp "access plus 30 days"
+  ExpiresByType font/woff2 "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 30 days"
+</IfModule>
+<IfModule mod_headers.c>
+  # Immutable caching for hashed/static assets
+  <FilesMatch "\.(woff2|svg|png|webp|jpg|jpeg)$">
+    Header set Cache-Control "public, max-age=2592000"
+  </FilesMatch>
+  <FilesMatch "\.(css|js)$">
+    Header set Cache-Control "public, max-age=604800"
+  </FilesMatch>
+</IfModule>

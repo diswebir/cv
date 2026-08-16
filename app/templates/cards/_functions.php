@@ -76,6 +76,34 @@ function card_head($title, $card) {
         echo '.card-page .card-cover{background-image:linear-gradient(180deg,rgba(10,10,30,.32),rgba(10,10,30,.03) 45%,var(--c1-glow)),url("' . e($cover) . '");background-size:cover;background-position:center;}';
     }
     echo '</style>';
+
+    // --- SEO & social sharing meta tags ---
+    $cardUrl = card_public_url($card);
+    $cardTitle = $card['full_name'] ?: 'کارت ویزیت';
+    $cardDesc = $card['job_title'] ? ($card['job_title'] . ($card['company'] ? ' — ' . $card['company'] : '')) : 'کارت ویزیت مجازی';
+    $cardImg = $card['logo'] ? upload_url($card['logo']) : '';
+    echo '<meta name="description" content="' . e($cardDesc) . '">';
+    echo '<meta property="og:type" content="profile">';
+    echo '<meta property="og:title" content="' . e($cardTitle) . '">';
+    echo '<meta property="og:description" content="' . e($cardDesc) . '">';
+    echo '<meta property="og:url" content="' . e($cardUrl) . '">';
+    echo '<meta property="og:locale" content="fa_IR">';
+    if ($cardImg) echo '<meta property="og:image" content="' . e($cardImg) . '">';
+    echo '<meta name="twitter:card" content="' . ($cardImg ? 'summary_large_image' : 'summary') . '">';
+    echo '<meta name="twitter:title" content="' . e($cardTitle) . '">';
+    echo '<meta name="twitter:description" content="' . e($cardDesc) . '">';
+    if ($cardImg) echo '<meta name="twitter:image" content="' . e($cardImg) . '">';
+    $ld = array(
+        '@context' => 'https://schema.org', '@type' => 'Person',
+        'name' => $card['full_name'], 'url' => $cardUrl,
+    );
+    if ($card['job_title']) $ld['jobTitle'] = $card['job_title'];
+    if ($card['company']) $ld['worksFor'] = array('@type' => 'Organization', 'name' => $card['company']);
+    if ($card['email']) $ld['email'] = $card['email'];
+    if ($card['phone']) $ld['telephone'] = $card['phone'];
+    if ($cardImg) $ld['image'] = $cardImg;
+    echo '<script type="application/ld+json">' . json_encode($ld, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . '</script>';
+
     echo '</head><body class="card-page tpl-' . $tpl . '">';
 }
 
@@ -97,7 +125,7 @@ function card_logo_pos($card) {
 // لوگو در همان جایگاه عکس پروفایل؛ اگر لوگویی نباشد حروف اول نام نمایش داده می‌شود.
 function c_logo($card, $size = '') {
     if (!empty($card['logo'])) {
-        return '<img class="card-logo ' . $size . '" src="' . e(upload_url($card['logo'])) . '" alt="' . e($card['full_name']) . '" loading="lazy">';
+        return '<img class="card-logo ' . $size . '" src="' . e(upload_url($card['logo'])) . '" alt="' . e($card['full_name']) . '" loading="lazy" data-lightbox="' . e(upload_url($card['logo'])) . '">';
     }
     return '<span class="card-logo card-logo-ph ' . $size . '">' . e(card_initials($card['full_name'])) . '</span>';
 }
@@ -172,7 +200,7 @@ function c_map($card) {
     $open = 'https://www.google.com/maps?q=' . $lat . ',' . $lng;
     echo '<section class="card-block map-block">';
     echo '<h3 class="blk-title">' . icon_svg('map-pin', 17) . ($card['map_address'] ? e($card['map_address']) : 'موقعیت مکانی') . '</h3>';
-    echo '<div class="map-frame"><iframe src="' . e($embed) . '" loading="lazy" title="نقشه"></iframe></div>';
+    echo '<div class="map-frame"><iframe src="' . e($embed) . '" loading="lazy" lang="fa" title="نقشه موقعیت کارت ویزیت" referrerpolicy="no-referrer-when-downgrade"></iframe></div>';
     echo '<a class="map-open" href="' . e($open) . '" target="_blank" rel="noopener">' . icon_svg('map', 16) . ' باز کردن مسیر در نقشه</a>';
     echo '</section>';
 }
@@ -203,10 +231,10 @@ function c_share($card) {
     echo '<section class="share-block">';
     echo '<span class="share-label">اشتراک‌گذاری کارت</span>';
     echo '<div class="share-row">';
-    echo '<a class="share-btn" href="' . e($wa) . '" target="_blank" rel="noopener" aria-label="واتساپ">' . icon_svg('whatsapp', 18) . '</a>';
-    echo '<a class="share-btn" href="' . e($tg) . '" target="_blank" rel="noopener" aria-label="تلگرام">' . icon_svg('telegram', 18) . '</a>';
-    echo '<button type="button" class="share-btn js-share" data-url="' . e($url) . '" aria-label="اشتراک‌گذاری">' . icon_svg('share', 18) . '</button>';
-    echo '<button type="button" class="share-btn js-copy" data-copy="' . e($url) . '" aria-label="کپی لینک">' . icon_svg('copy', 18) . '</button>';
+    echo '<a class="share-btn" href="' . e($wa) . '" target="_blank" rel="noopener" aria-label="اشتراک در واتساپ">' . icon_svg('whatsapp', 18) . '</a>';
+    echo '<a class="share-btn" href="' . e($tg) . '" target="_blank" rel="noopener" aria-label="اشتراک در تلگرام">' . icon_svg('telegram', 18) . '</a>';
+    echo '<button type="button" class="share-btn js-share" data-url="' . e($url) . '" aria-label="اشتراک‌گذاری با سایر اپلیکیشن‌ها">' . icon_svg('share', 18) . '</button>';
+    echo '<button type="button" class="share-btn js-copy" data-copy="' . e($url) . '" aria-label="کپی لینک کارت">' . icon_svg('copy', 18) . '</button>';
     echo '</div></section>';
 }
 
