@@ -3,6 +3,16 @@
  * Shared helpers for public card templates (app/templates/cards/*.php)
  */
 
+/**
+ * Validate a hex color (#RRGGBB). Returns the safe default if the value does
+ * not match, so it can be embedded into CSS attributes without escaping risk
+ * even when the DB row was tampered with outside the form handler.
+ */
+function safe_hex_color($value, $default = '#4f46e5') {
+    $v = (string)$value;
+    return preg_match('/^#[0-9a-fA-F]{6}$/', $v) ? $v : $default;
+}
+
 function hex_rgb($hex) {
     $hex = ltrim((string)$hex, '#');
     if (strlen($hex) === 3) $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
@@ -48,8 +58,8 @@ function card_theme_style($c1, $c2) {
 }
 
 function card_head($title, $card) {
-    $c1 = $card['color1'] ?: '#4f46e5';
-    $c2 = $card['color2'] ?: '#7c3aed';
+    $c1 = safe_hex_color($card['color1'] ?? '', '#4f46e5');
+    $c2 = safe_hex_color($card['color2'] ?? '', '#7c3aed');
     $cover = $card['cover'] ? upload_url($card['cover']) : '';
     echo '<!DOCTYPE html>' . "\n";
     echo '<html lang="fa" dir="rtl">' . "\n";

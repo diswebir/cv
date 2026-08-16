@@ -70,14 +70,18 @@ document.addEventListener('DOMContentLoaded', function () {
   window.vcConfirm = function (message, onYes, onNo) {
     var backdrop = document.createElement('div');
     backdrop.className = 'modal-backdrop';
+    // Security: build the DOM shell with innerHTML (static markup) but inject the
+    // message via textContent to prevent XSS if a dynamic message is ever passed.
     backdrop.innerHTML =
       '<div class="modal-card">' +
       '<div class="modal-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 8v5m0 3.5v.5M10.3 3.9 2.3 18a2 2 0 0 0 1.7 3h16a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' +
-      '<h3>تأیید</h3><p>' + message + '</p>' +
+      '<h3>تأیید</h3><p></p>' +
       '<div class="modal-actions">' +
       '<button type="button" class="btn btn-danger js-modal-no">انصراف</button>' +
       '<button type="button" class="btn btn-primary js-modal-yes">تأیید</button>' +
       '</div></div>';
+    var msgEl = backdrop.querySelector('p');
+    if (msgEl) msgEl.textContent = message;
     function close() { backdrop.remove(); }
     backdrop.querySelector('.js-modal-no').addEventListener('click', function () { close(); if (onNo) onNo(); });
     backdrop.querySelector('.js-modal-yes').addEventListener('click', function () { close(); if (onYes) onYes(); });

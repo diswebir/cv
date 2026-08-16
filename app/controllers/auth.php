@@ -24,6 +24,10 @@ function auth_register() {
         flash('ثبت‌نام کاربران جدید غیرفعال شده است.', 'error');
         redirect('login');
     }
+    // Rate-limit registration attempts per IP to prevent mass account creation.
+    if (rate_limit_blocked('register_ip_' . md5(client_ip()), 'x', 5, 3600)) {
+        http_error_page(429, 'تعداد ثبت‌نام از این آی‌پی بیش از حد است. لطفاً بعداً تلاش کنید.');
+    }
     $error = '';
     $data = array('name' => '', 'email' => '');
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -35,6 +39,7 @@ function auth_register() {
         if ($pass !== $pass2) {
             $error = 'تکرار رمز عبور مطابقت ندارد.';
         } else {
+            rate_limit_hit('register_ip_' . md5(client_ip()), 'x', 5, 3600);
             $res = register_user($data['name'], $data['email'], $pass);
             if ($res['ok']) {
                 attempt_login($data['email'], $pass);

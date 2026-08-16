@@ -135,12 +135,34 @@ function handle_card_form($card = null) {
 
     if ($isNew) {
         $data['code'] = $code;
-        $newId = create_card($user['id'], $data);
+        try {
+            $newId = create_card($user['id'], $data);
+        } catch (Exception $e) {
+            // Most likely a UNIQUE constraint violation on `code` due to a
+            // concurrent request (TOCTOU between get_card_by_code and insert).
+            // Clean up the uploaded files so they do not become orphans, then
+            // retry once with a fresh unique code.
+            foreach ($uploaded as $p) delete_upload($p);
+            $data['code'] = unique_card_code();
+            try {
+                $newId = create_card($user['id'], $data);
+            } catch (Exception $e2) {
+                foreach ($uploaded as $p) delete_upload($p);
+                return 'ساخت کارت ناموفق بود. لطفاً مجدداً تلاش کنید.';
+            }
+        }
         flash('کارت ویزیت با موفقیت ساخته شد.');
         redirect('panel/card/edit?id=' . $newId);
     }
 
-    update_card($card['id'], $data);
+    try {
+        update_card($card['id'], $data);
+    } catch (Exception $e) {
+        // On a DB error the new uploads are not linked to the card; remove them
+        // to avoid orphaned files on disk.
+        foreach ($uploaded as $p) delete_upload($p);
+        return 'ذخیره‌سازی تغییرات ناموفق بود. لطفاً مجدداً تلاش کنید.';
+    }
     flash('تغییرات با موفقیت ذخیره شد.');
     redirect('panel/card/edit?id=' . $card['id']);
 }
