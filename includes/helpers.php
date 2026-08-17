@@ -5,12 +5,22 @@ function config($k, $default = null) {
     return array_key_exists($k, $c) ? $c[$k] : $default;
 }
 
+function card_templates_allowed() {
+    return array('classic', 'dark', 'minimal', 'gradient', 'business', 'neon');
+}
+
 function e($s) {
     return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
 }
 
 function base_url($path = '') {
     static $b = null;
+    static $ver = null;
+    $curVer = (int)get_setting('__base_url_version', 0);
+    if ($ver !== $curVer) {
+        $b = null;
+        $ver = $curVer;
+    }
     if ($b === null) $b = rtrim((string)config('base_url', ''), '/');
     if ($path === '') return $b;
     if (pretty_urls_enabled()) return $b . '/' . ltrim($path, '/');
@@ -54,8 +64,26 @@ function redirect_raw($url) {
 function path_prefix() {
     static $p = null;
     if ($p !== null) return $p;
+    
+    // Use multiple sources for robustness in subdirectory installations
     $sn = $_SERVER['SCRIPT_NAME'] ?? '';
-    $p = rtrim(str_replace('\\', '/', dirname($sn)), '/');
+    $sc = $_SERVER['SCRIPT_FILENAME'] ?? '';
+    $dr = $_SERVER['DOCUMENT_ROOT'] ?? '';
+    
+    // Prefer SCRIPT_NAME (URL path)
+    if ($sn !== '') {
+        $p = rtrim(str_replace('\\', '/', dirname($sn)), '/');
+    }
+    // Fallback: derive from SCRIPT_FILENAME and DOCUMENT_ROOT
+    elseif ($sc !== '' && $dr !== '' && strpos($sc, $dr) === 0) {
+        $relative = substr($sc, strlen($dr));
+        $p = rtrim(str_replace('\\', '/', dirname($relative)), '/');
+    }
+    // Final fallback: empty (root)
+    else {
+        $p = '';
+    }
+    
     if ($p === '.' || $p === '/') $p = '';
     return $p;
 }
@@ -125,7 +153,8 @@ function digits_to_latin($s) {
 }
 
 function fa_num_format($n) {
-    return fa_num(number_format((float)$n, 0, '.', ','));
+    // Use explicit Persian thousands separator (،) instead of relying on locale
+    return fa_num(number_format((float)$n, 0, '.', '،'));
 }
 
 function post($k, $d = '') { return isset($_POST[$k]) ? $_POST[$k] : $d; }
@@ -133,6 +162,11 @@ function get($k, $d = '') { return isset($_GET[$k]) ? $_GET[$k] : $d; }
 
 function csrf_token() {
     if (empty($_SESSION['csrf_token'])) $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    return $_SESSION['csrf_token'];
+}
+
+function csrf_rotate() {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
     return $_SESSION['csrf_token'];
 }
 
@@ -160,12 +194,9 @@ function csrf_check() {
         // UX: instead of a hard error page, show a flash message and send the
         // user back to the form so their entered data can be re-rendered.
         flash('برای امنیت، لطفاً دوباره روی دکمه بزنید.', 'error');
-        $back = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
-        if ($back !== '' && strpos($back, '://') !== false) {
-            header('Location: ' . $back);
-        } else {
-            http_error_page(419, 'جلسه شما منقضی شده است. لطفاً صفحه را دوباره بارگذاری کنید.');
-        }
+        // Use fixed fallback instead of HTTP_REFERER to prevent open redirect
+        $fallback = base_url('login');
+        header('Location: ' . $fallback);
         exit;
     }
 }
@@ -194,44 +225,77 @@ function upload_file($field, $options = array()) {
     if (!in_array($ext, $allowed)) return array('ok' => false, 'error' => 'فرمت فایل مجاز نیست.');
     if (function_exists('finfo_open')) {
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        $mime = @finfo_file($finfo, $f['tmp_name']);
+        $mime = finfo_file($finfo, $f['tmp_name']);
         finfo_close($finfo);
         $okMimes = array('jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png', 'webp' => 'image/webp');
         if (isset($okMimes[$ext]) && $mime !== $okMimes[$ext]) return array('ok' => false, 'error' => 'محتوای فایل نامعتبر است.');
     } elseif (function_exists('getimagesize')) {
-        $info = @getimagesize($f['tmp_name']);
+        $info = getimagesize($f['tmp_name']);
         $okTypes = array('jpg' => 2, 'jpeg' => 2, 'png' => 3, 'webp' => 18);
         if (!$info || !isset($okTypes[$ext]) || $info[2] !== $okTypes[$ext]) return array('ok' => false, 'error' => 'محتوای فایل نامعتبر است.');
     }
     $dir = VC_UPLOAD_DIR;
-    if (!is_dir($dir)) @mkdir($dir, 0755, true);
+    if (!is_dir($dir)) mkdir($dir, 0755, true);
     $name = date('Ymd') . '-' . bin2hex(random_bytes(8)) . '.' . $ext;
     if (!move_uploaded_file($f['tmp_name'], $dir . '/' . $name)) return array('ok' => false, 'error' => 'ذخیره فایل ناموفق بود.');
-    @chmod($dir . '/' . $name, 0644);
+    chmod($dir . '/' . $name, 0644);
     return array('ok' => true, 'path' => 'uploads/' . $name);
 }
 
 function delete_upload($relPath) {
     if (!$relPath || !is_string($relPath)) return;
-    $p = VC_ROOT . '/' . ltrim($relPath, '/');
-    if (strpos($relPath, 'uploads/') === 0 && is_file($p)) @unlink($p);
+    // Normalize path and prevent directory traversal
+    $relPath = ltrim($relPath, '/');
+    $relPath = str_replace('\\', '/', $relPath);
+    // Resolve any . or .. components
+    $parts = array();
+    foreach (explode('/', $relPath) as $part) {
+        if ($part === '' || $part === '.') continue;
+        if ($part === '..') {
+            array_pop($parts);
+        } else {
+            $parts[] = $part;
+        }
+    }
+    $safePath = implode('/', $parts);
+    // Must be inside uploads directory
+    if (strpos($safePath, 'uploads/') !== 0) return;
+    $p = VC_ROOT . '/' . $safePath;
+    if (is_file($p)) unlink($p);
 }
 
 function client_ip() {
     // Default to the TCP-level remote address, which clients cannot forge.
     $remote = substr($_SERVER['REMOTE_ADDR'] ?? '', 0, 45);
-    if (!request_is_behind_trusted_proxy()) return $remote;
+    if (!request_is_behind_trusted_proxy()) {
+        // Handle IPv6-mapped IPv4 (::ffff:1.2.3.4) -> return IPv4
+        if (preg_match('/^::ffff:(\d+\.\d+\.\d+\.\d+)$/', $remote, $m)) {
+            return $m[1];
+        }
+        return $remote;
+    }
     // Behind a trusted proxy: CF-Connecting-IP takes precedence, otherwise the
     // leftmost X-Forwarded-For entry. We still validate it is an IP-like string.
     if (!empty($_SERVER['HTTP_CF_CONNECTING_IP'])) {
         $ip = trim($_SERVER['HTTP_CF_CONNECTING_IP']);
-        if (filter_var($ip, FILTER_VALIDATE_IP)) return substr($ip, 0, 45);
+        if (filter_var($ip, FILTER_VALIDATE_IP)) {
+            // Handle IPv6-mapped IPv4
+            if (preg_match('/^::ffff:(\d+\.\d+\.\d+\.\d+)$/', $ip, $m)) {
+                return $m[1];
+            }
+            return substr($ip, 0, 45);
+        }
     }
     if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
         $parts = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
         foreach ($parts as $p) {
             $p = trim($p);
-            if (filter_var($p, FILTER_VALIDATE_IP)) return substr($p, 0, 45);
+            if (filter_var($p, FILTER_VALIDATE_IP)) {
+                if (preg_match('/^::ffff:(\d+\.\d+\.\d+\.\d+)$/', $p, $m)) {
+                    return $m[1];
+                }
+                return substr($p, 0, 45);
+            }
         }
     }
     return $remote;
@@ -271,19 +335,34 @@ function rate_limit_hit($bucket, $id, $max = 5, $window = 900) {
     $hash = hash('sha256', $bucket . '|' . (string)$id);
     $file = $dir . '/' . substr($hash, 0, 32) . '.json';
     $now = time();
-    $data = array();
-    if (is_file($file)) {
-        $raw = @file_get_contents($file);
-        $decoded = json_decode($raw, true);
-        if (is_array($decoded) && isset($decoded['count'], $decoded['time'])) $data = $decoded;
+
+    // Use flock for atomic read-modify-write to prevent race conditions
+    $fp = @fopen($file, 'c+');
+    if (!$fp) return false;
+
+    if (flock($fp, LOCK_EX)) {
+        $data = array();
+        if (filesize($file) > 0) {
+            $raw = fread($fp, filesize($file));
+            $decoded = json_decode($raw, true);
+            if (is_array($decoded) && isset($decoded['count'], $decoded['time'])) $data = $decoded;
+        }
+
+        if (!$data || !isset($data['time']) || ($now - (int)$data['time']) >= $window) {
+            $data = array('count' => 1, 'time' => $now);
+        } else {
+            $data['count'] = (int)$data['count'] + 1;
+        }
+
+        ftruncate($fp, 0);
+        rewind($fp);
+        fwrite($fp, json_encode($data));
+        fflush($fp);
+        flock($fp, LOCK_UN);
     }
-    if (!$data || !isset($data['time']) || ($now - (int)$data['time']) >= $window) {
-        $data = array('count' => 1, 'time' => $now);
-    } else {
-        $data['count'] = (int)$data['count'] + 1;
-    }
-    @file_put_contents($file, json_encode($data), LOCK_EX);
-    return $data['count'] > $max;
+    fclose($fp);
+
+    return isset($data['count']) && $data['count'] > $max;
 }
 
 /** Reset a rate-limit bucket (e.g. after a successful login). */
@@ -305,7 +384,7 @@ function page_title($t) {
 }
 
 function get_page_title() {
-    $app = (string)get_setting('app_name', 'کارت ویزیت من');
+    $app = (string)get_setting('app_name', 'cv4u');
     if (!empty($GLOBALS['__page_title'])) return $GLOBALS['__page_title'] . ' | ' . $app;
     return $app;
 }
@@ -373,7 +452,6 @@ function icon_svg($name, $size = 20) {
         'check-circle' => '<circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8.5 12l2.5 2.5 4.5-5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>',
         'image' => '<rect x="3.5" y="4" width="17" height="16" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="9" cy="9.5" r="1.8" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M4.5 17l4.5-4 3 2.7 3.5-3.5 4 3.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>',
     );
-    }
     if (!isset($paths[$name])) $name = 'info';
     return '<svg width="' . $size . '" height="' . $size . '" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' . $paths[$name] . '</svg>';
 }

@@ -30,9 +30,16 @@ function panel_dashboard() {
 
 function card_form_socials() {
     $out = array();
+    // Limit to prevent excessive data
+    $maxSocials = 15;
+    $count = 0;
     foreach (social_keys() as $k) {
+        if ($count >= $maxSocials) break;
         $v = clean_text(post('social_' . $k), 300);
-        if ($v !== '') $out[$k] = $v;
+        if ($v !== '') {
+            $out[$k] = $v;
+            $count++;
+        }
     }
     return $out;
 }
@@ -41,10 +48,17 @@ function card_form_custom() {
     $labels = isset($_POST['cf_label']) && is_array($_POST['cf_label']) ? $_POST['cf_label'] : array();
     $values = isset($_POST['cf_value']) && is_array($_POST['cf_value']) ? $_POST['cf_value'] : array();
     $out = array();
+    // Limit to 20 custom fields to prevent DoS
+    $maxFields = 20;
+    $count = 0;
     foreach ($labels as $i => $l) {
+        if ($count >= $maxFields) break;
         $l = clean_text($l, 100);
         $v = clean_text(isset($values[$i]) ? $values[$i] : '', 500);
-        if ($l !== '' && $v !== '') $out[] = array('label' => $l, 'value' => $v);
+        if ($l !== '' && $v !== '') {
+            $out[] = array('label' => $l, 'value' => $v);
+            $count++;
+        }
     }
     return $out;
 }
@@ -59,6 +73,10 @@ function float_or_null($v, $maxAbs = 90) {
 
 function handle_card_form($card = null) {
     $error = '';
+    $fullNameError = '';
+    $emailError = '';
+    $phoneError = '';
+    $codeError = '';
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') return $error;
     csrf_check();
 
@@ -66,12 +84,18 @@ function handle_card_form($card = null) {
     $isNew = $card === null;
 
     $fullName = clean_text(post('full_name'), 120);
-    if ($fullName === '') return 'نام و نام خانوادگی الزامی است.';
+    if ($fullName === '') {
+        $fullNameError = 'نام و نام خانوادگی الزامی است.';
+    }
 
     $email = strtolower(clean_text(post('email'), 160));
-    if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) return 'ایمیل واردشده معتبر نیست.';
+    if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $emailError = 'ایمیل واردشده معتبر نیست.';
+    }
     $phone = clean_text(post('phone'), 40);
-    if ($phone !== '' && !preg_match('/^[0-9+\s().\-]{5,20}$/', digits_to_latin($phone))) return 'شماره موبایل واردشده معتبر نیست.';
+    if ($phone !== '' && !preg_match('/^[0-9+\s().\-]{5,20}$/', digits_to_latin($phone))) {
+        $phoneError = 'شماره موبایل واردشده معتبر نیست.';
+    }
 
     $code = '';
     if ($isNew) {
@@ -82,6 +106,28 @@ function handle_card_form($card = null) {
             $taken = get_card_by_code($code);
             if ($taken) $code = unique_card_code();
         }
+    } else {
+        // For edit, validate the code if it was changed
+        $submittedCode = clean_text(post('code'), 16);
+        if ($submittedCode !== '' && $submittedCode !== $card['code']) {
+            if (!is_valid_card_code($submittedCode)) {
+                $codeError = 'کد کوتاه نامعتبر است (فقط حروف انگلیسی و اعداد، ' . card_code_min() . ' تا ' . card_code_max() . ' کاراکتر).';
+            } elseif (get_card_by_code($submittedCode)) {
+                $codeError = 'این کد قبلاً استفاده شده است.';
+            } else {
+                $data['code'] = $submittedCode;
+            }
+        }
+    }
+
+    if ($fullNameError !== '' || $emailError !== '' || $phoneError !== '' || $codeError !== '') {
+        return array(
+            'error' => 'لطفاً خطاهای فرم را برطرف کنید.',
+            'fullNameError' => $fullNameError,
+            'emailError' => $emailError,
+            'phoneError' => $phoneError,
+            'codeError' => $codeError,
+        );
     }
 
     $data = array(
@@ -94,7 +140,7 @@ function handle_card_form($card = null) {
         'website' => clean_text(post('website'), 200),
         'address' => clean_text(post('address'), 1000),
         'bio' => clean_text(post('bio'), 2000),
-        'template' => in_array(post('template'), array('classic', 'dark', 'minimal', 'gradient', 'business', 'neon'), true) ? post('template') : 'classic',
+        'template' => in_array(post('template'), card_templates_allowed(), true) ? post('template') : 'classic',
         'color1' => preg_match('/^#[0-9a-fA-F]{6}$/', (string)post('color1')) ? post('color1') : '#4f46e5',
         'color2' => preg_match('/^#[0-9a-fA-F]{6}$/', (string)post('color2')) ? post('color2') : '#7c3aed',
         'qr_theme' => in_array(post('qr_theme'), VQR::themes_list(), true) ? post('qr_theme') : 'classic',
@@ -187,6 +233,18 @@ function panel_card_form($id) {
     $socials = $card ? card_socials($card) : array();
     $fields = $card ? card_custom_fields($card) : array();
 
+    $fullNameError = '';
+    $emailError = '';
+    $phoneError = '';
+    $codeError = '';
+    if (is_array($error)) {
+        $fullNameError = $error['fullNameError'] ?? '';
+        $emailError = $error['emailError'] ?? '';
+        $phoneError = $error['phoneError'] ?? '';
+        $codeError = $error['codeError'] ?? '';
+        $error = $error['error'];
+    }
+
     render_panel($card ? 'ویرایش کارت' : 'ساخت کارت جدید', 'panel/card_form.php', array(
         'user' => $user,
         'card' => $card,
@@ -194,6 +252,10 @@ function panel_card_form($id) {
         'preCode' => $preCode,
         'socials' => $socials,
         'fields' => $fields,
+        'fullNameError' => $fullNameError,
+        'emailError' => $emailError,
+        'phoneError' => $phoneError,
+        'codeError' => $codeError,
     ), 'cards');
 }
 

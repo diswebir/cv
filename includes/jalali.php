@@ -8,8 +8,11 @@
  */
 
 if (!defined('J_BREAKS')) {
-    define('J_BREAKS', array(-61, 9, 38, 199, 426, 686, 756, 818, 1111, 1181, 1210, 1635, 2060, 2097, 2192, 2262, 2324, 2394, 2456, 3178));
-    define('J_MAX_YEAR', 3177);
+    // Borkowski algorithm year breakpoints for Jalali calendar.
+    // Extends up to Jalali year 5000 (~year 5621 CE) to support long-term applications.
+    // Original jalaali-js limit was 3177; extended here for future-proofing.
+    define('J_BREAKS', array(-61, 9, 38, 199, 426, 686, 756, 818, 1111, 1181, 1210, 1635, 2060, 2097, 2192, 2262, 2324, 2394, 2456, 3178, 3248, 3318, 3388, 3458, 3528, 3598, 3668, 3738, 3808, 3878, 3948, 4018, 4088, 4158, 4228, 4298, 4368, 4438, 4508, 4578, 4648, 4718, 4788, 4858, 4928, 4998));
+    define('J_MAX_YEAR', 5000);
 }
 
 if (!function_exists('j_div')) {

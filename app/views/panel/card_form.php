@@ -37,13 +37,17 @@ $demoData = 'https://example.com';
 
   <form method="post" enctype="multipart/form-data" class="editor-form" id="cardForm">
     <?= csrf_field() ?>
-    <?php if (!$card): ?><input type="hidden" name="code" value="<?= e($preCode) ?>"><?php endif; ?>
+    <?php if ($card): ?>
+        <input type="hidden" name="code" value="<?= e($card['code']) ?>">
+    <?php else: ?>
+        <input type="hidden" name="code" value="<?= e($preCode) ?>">
+    <?php endif; ?>
 
     <!-- ===== اطلاعات ===== -->
     <div class="etab" data-panel="info" role="tabpanel" aria-labelledby="tab-info" tabindex="0">
       <div class="etab-head"><h3>اطلاعات اصلی</h3><p>نام و مشخصات شغلی که روی کارت نمایش داده می‌شود.</p></div>
       <div class="form-grid">
-        <div class="field span2"><label>نام و نام خانوادگی *</label><input type="text" name="full_name" value="<?= e(fval($card, 'full_name')) ?>" placeholder="مثلاً رامین احمدی" required></div>
+        <div class="field span2"><label>نام و نام خانوادگی *</label><input type="text" name="full_name" value="<?= e(fval($card, 'full_name')) ?>" placeholder="مثلاً رامین احمدی" required aria-describedby="full_name-error" <?= $fullNameError !== '' ? 'aria-invalid="true"' : '' ?>><?php if (!empty($fullNameError)): ?><span id="full_name-error" class="field-error" role="alert" aria-live="polite"><?= e($fullNameError) ?></span><?php endif; ?></div>
         <div class="field"><label>سمت / عنوان شغلی</label><input type="text" name="job_title" value="<?= e(fval($card, 'job_title')) ?>" placeholder="مثلاً طراح محصول"></div>
         <div class="field"><label>شرکت / کسب‌وکار</label><input type="text" name="company" value="<?= e(fval($card, 'company')) ?>" placeholder="نام شرکت شما"></div>
         <div class="field span2"><label>درباره / توضیحات</label><textarea name="bio" rows="4" placeholder="چند خط درباره خودتان یا کسب‌وکارتان"><?= e(fval($card, 'bio')) ?></textarea></div>
@@ -54,9 +58,9 @@ $demoData = 'https://example.com';
     <div class="etab" data-panel="contact" hidden>
       <div class="etab-head"><h3>اطلاعات تماس</h3><p>شماره‌ها و راه‌های ارتباطی که روی کارت به‌صورت دکمه نمایش داده می‌شوند.</p></div>
       <div class="form-grid">
-        <div class="field"><label>موبایل</label><input type="text" name="phone" value="<?= e(fval($card, 'phone')) ?>" placeholder="0912 000 0000" dir="ltr"></div>
+        <div class="field"><label>موبایل</label><input type="text" name="phone" value="<?= e(fval($card, 'phone')) ?>" placeholder="0912 000 0000" dir="ltr" aria-describedby="phone-error" <?= $phoneError !== '' ? 'aria-invalid="true"' : '' ?>><?php if (!empty($phoneError)): ?><span id="phone-error" class="field-error" role="alert" aria-live="polite"><?= e($phoneError) ?></span><?php endif; ?></div>
         <div class="field"><label>موبایل دوم</label><input type="text" name="phone2" value="<?= e(fval($card, 'phone2')) ?>" placeholder="تلفن ثابت یا شماره دوم" dir="ltr"></div>
-        <div class="field"><label>ایمیل</label><input type="email" name="email" value="<?= e(fval($card, 'email')) ?>" placeholder="you@example.com" dir="ltr"></div>
+        <div class="field"><label>ایمیل</label><input type="email" name="email" value="<?= e(fval($card, 'email')) ?>" placeholder="you@example.com" dir="ltr" aria-describedby="email-error" <?= $emailError !== '' ? 'aria-invalid="true"' : '' ?>><?php if (!empty($emailError)): ?><span id="email-error" class="field-error" role="alert" aria-live="polite"><?= e($emailError) ?></span><?php endif; ?></div>
         <div class="field"><label>وب‌سایت</label><input type="text" name="website" value="<?= e(fval($card, 'website')) ?>" placeholder="https://example.com" dir="ltr"></div>
         <div class="field span2"><label>آدرس</label><textarea name="address" rows="2" placeholder="آدرس کامل محل کار"><?= e(fval($card, 'address')) ?></textarea></div>
       </div>
@@ -116,9 +120,11 @@ $demoData = 'https://example.com';
       <div class="etab-head"><h3>موقعیت مکانی</h3><p>نقشه در کارت نمایش داده می‌شود و بازدیدکننده با یک لمس مسیر را در اپلیکیشن نقشه باز می‌کند.</p></div>
       <div class="form-grid">
         <div class="field span2"><label>عنوان لوکیشن</label><input type="text" name="map_address" value="<?= e(fval($card, 'map_address')) ?>" placeholder="مثلاً دفتر مرکزی تهران، خیابان ولیعصر"></div>
-        <div class="field"><label>عرض جغرافیایی (Latitude)</label><input type="text" name="map_lat" value="<?= e(fval($card, 'map_lat', '')) ?>" placeholder="35.6892" dir="ltr"></div>
-        <div class="field"><label>طول جغرافیایی (Longitude)</label><input type="text" name="map_lng" value="<?= e(fval($card, 'map_lng', '')) ?>" placeholder="51.3890" dir="ltr"></div>
+        <div class="field"><label>عرض جغرافیایی (Latitude)</label><input type="number" step="any" min="-90" max="90" name="map_lat" value="<?= e(fval($card, 'map_lat', '')) ?>" placeholder="35.6892" dir="ltr" aria-describedby="map_lat-hint"></div>
+        <div class="field"><label>طول جغرافیایی (Longitude)</label><input type="number" step="any" min="-180" max="180" name="map_lng" value="<?= e(fval($card, 'map_lng', '')) ?>" placeholder="51.3890" dir="ltr" aria-describedby="map_lng-hint"></div>
       </div>
+      <div class="form-hint" id="map_lat-hint">مثال: 35.6892 (بین -90 تا 90)</div>
+      <div class="form-hint" id="map_lng-hint">مثال: 51.3890 (بین -180 تا 180)</div>
       <p class="form-hint">راه سریع: موقعیت خود را در <a href="https://maps.google.com" target="_blank" rel="noopener">Google Maps</a> پیدا کنید، روی نقطه کلیک راست کنید و مختصات را کپی کنید؛ یا از طریق دکمه زیر لوکیشن فعلی مرورگر را بگیرید.</p>
       <button type="button" class="btn btn-sm btn-ghost" id="locBtn"><?= icon_svg('map-pin', 16); ?> گرفتن موقعیت فعلی</button>
     </div>
@@ -130,9 +136,11 @@ $demoData = 'https://example.com';
         <?php $cf = $_SERVER['REQUEST_METHOD'] === 'POST' ? array() : $fields;
         if ($cf): foreach ($cf as $i => $f): ?>
         <div class="cf-row">
-          <input type="text" name="cf_label[]" placeholder="عنوان (مثلاً ساعات کاری)" value="<?= e($f['label']) ?>">
-          <input type="text" name="cf_value[]" placeholder="مقدار" value="<?= e($f['value']) ?>">
-          <button type="button" class="icon-btn icon-danger cf-remove" aria-label="حذف"><?= icon_svg('close', 16); ?></button>
+          <label for="cf_label_<?= $i ?>" class="sr-only">عنوان فیلد</label>
+          <input type="text" name="cf_label[]" id="cf_label_<?= $i ?>" placeholder="عنوان (مثلاً ساعات کاری)" value="<?= e($f['label']) ?>">
+          <label for="cf_value_<?= $i ?>" class="sr-only">مقدار فیلد</label>
+          <input type="text" name="cf_value[]" id="cf_value_<?= $i ?>" placeholder="مقدار" value="<?= e($f['value']) ?>">
+          <button type="button" class="icon-btn icon-danger cf-remove" aria-label="حذف فیلد"><?= icon_svg('close', 16); ?></button>
         </div>
         <?php endforeach; endif; ?>
       </div>
@@ -193,7 +201,7 @@ $demoData = 'https://example.com';
       <div class="qr-editor">
         <div class="qr-preview-side">
           <div class="qr-preview-box">
-            <img id="qrPreview" src="" alt="پیش‌نمایش QR" width="220" height="220">
+            <img id="qrPreview" src="" alt="پیش‌نمایش QR کارت <?= e($card['full_name'] ?? 'بدون نام') ?>" width="220" height="220">
           </div>
           <div class="qr-dl-row">
             <a class="btn btn-sm btn-primary" id="qrDlPng" href="#" download>دانلود PNG</a>

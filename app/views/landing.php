@@ -16,7 +16,7 @@
       </div>
       <?php else: ?>
       <div class="hero-stats">
-        <div class="hs-item"><strong>رایگان</strong><span>بدون نیاز به SSL یا SSH</span></div>
+        <div class="hs-item"><strong>رایگان</strong><span>ثبت‌نام و استفاده رایگان بدون پرداخت هزینه</span></div>
         <div class="hs-item"><strong>۶ قالب</strong><span>حرفه‌ای و قابل‌سفارشی</span></div>
         <div class="hs-item"><strong>۱۸+ تم</strong><span>کد QR اختصاصی</span></div>
       </div>
@@ -170,12 +170,30 @@
       <a class="btn btn-lg btn-primary" href="<?= e(base_url('register')) ?>">همین حالا شروع کنید</a>
     </div>
     <div class="qr-show-gallery">
-      <div class="mini-qr mq-1"></div>
-      <div class="mini-qr mq-2"></div>
-      <div class="mini-qr mq-3"></div>
-      <div class="mini-qr mq-4"></div>
-      <div class="mini-qr mq-5"></div>
-      <div class="mini-qr mq-6"></div>
+      <div class="mini-qr-item">
+        <div class="mini-qr" data-theme="classic" data-dots="square"></div>
+        <span class="qr-label">کلاسیک</span>
+      </div>
+      <div class="mini-qr-item">
+        <div class="mini-qr" data-theme="dark" data-dots="round"></div>
+        <span class="qr-label">تیره</span>
+      </div>
+      <div class="mini-qr-item">
+        <div class="mini-qr" data-theme="gradient1" data-dots="circle"></div>
+        <span class="qr-label">آبی-بنفش</span>
+      </div>
+      <div class="mini-qr-item">
+        <div class="mini-qr" data-theme="gradient3" data-dots="square"></div>
+        <span class="qr-label">صورتی-نارنجی</span>
+      </div>
+      <div class="mini-qr-item">
+        <div class="mini-qr" data-theme="green" data-dots="round"></div>
+        <span class="qr-label">سبز</span>
+      </div>
+      <div class="mini-qr-item">
+        <div class="mini-qr" data-theme="purple" data-dots="circle"></div>
+        <span class="qr-label">بنفش</span>
+      </div>
     </div>
   </div>
 </section>

@@ -1,4 +1,4 @@
-<?php $siteName = (string)get_setting('app_name', 'کارت ویزیت من'); ?>
+<?php $siteName = (string)get_setting('app_name', 'cv4u'); ?>
 <div class="stat-row">
   <div class="stat-card">
     <div class="stat-icon si-1"><?= icon_svg('cards', 22); ?></div>
@@ -50,17 +50,17 @@
         <div class="vc-stats"><span><?= icon_svg('eye', 14); ?> <?= fa_num_format($c['visits']) ?> بازدید</span><span><?= icon_svg('calendar', 14); ?> <?= fa_date(strtotime($c['created_at'])) ?></span></div>
       </div>
       <div class="vc-actions">
-        <a class="icon-btn" target="_blank" rel="noopener" href="<?= e($short) ?>" title="مشاهده کارت"><?= icon_svg('eye', 17); ?></a>
-        <a class="icon-btn" href="<?= e(base_url('panel/card/' . $c['id'])) ?>" title="آمار"><?= icon_svg('dashboard', 17); ?></a>
-        <a class="icon-btn" href="<?= e(base_url('panel/card/edit?id=' . $c['id'])) ?>" title="ویرایش"><?= icon_svg('edit', 17); ?></a>
-        <a class="icon-btn" href="<?= e(base_url('qr/' . $c['code'] . '.png?download=1&px=24')) ?>" title="دانلود QR" download><?= icon_svg('download', 17); ?></a>
+        <a class="icon-btn" target="_blank" rel="noopener" href="<?= e($short) ?>" aria-label="مشاهده کارت"><?= icon_svg('eye', 17); ?></a>
+        <a class="icon-btn" href="<?= e(base_url('panel/card/' . $c['id'])) ?>" aria-label="آمار بازدید"><?= icon_svg('dashboard', 17); ?></a>
+        <a class="icon-btn" href="<?= e(base_url('panel/card/edit?id=' . $c['id'])) ?>" aria-label="ویرایش کارت"><?= icon_svg('edit', 17); ?></a>
+        <a class="icon-btn" href="<?= e(base_url('qr/' . $c['code'] . '.png?download=1&px=24')) ?>" aria-label="دانلود QR" download><?= icon_svg('download', 17); ?></a>
         <label class="mini-switch" title="<?= (int)$c['active'] === 1 ? 'غیرفعال کردن' : 'فعال کردن' ?>">
           <input type="checkbox" class="js-card-toggle" <?= (int)$c['active'] === 1 ? 'checked' : '' ?> data-url="<?= e(base_url('panel/card/toggle?id=' . $c['id'])) ?>" data-csrf="<?= e(csrf_token()) ?>">
           <span class="ms-track"></span>
         </label>
         <form method="post" action="<?= e(base_url('panel/card/delete?id=' . $c['id'])) ?>" class="inline-form" data-confirm="این کارت برای همیشه حذف می‌شود. ادامه می‌دهید؟">
           <?= csrf_field() ?>
-          <button type="submit" class="icon-btn icon-danger" title="حذف"><?= icon_svg('trash', 17); ?></button>
+          <button type="submit" class="icon-btn icon-danger" aria-label="حذف کارت"><?= icon_svg('trash', 17); ?></button>
         </form>
       </div>
     </div>

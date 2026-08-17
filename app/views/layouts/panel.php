@@ -1,4 +1,4 @@
-<?php $siteName = (string)get_setting('app_name', 'کارت ویزیت من'); $me = current_user(); ?>
+<?php $siteName = (string)get_setting('app_name', 'cv4u'); $me = current_user(); ?>
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>

@@ -51,18 +51,9 @@ $addOpen  = ($addError !== '' || !empty($addData)); ?>
           <div class="td-actions">
             <form method="post" action="<?= e(base_url('admin/user/toggle?id=' . $u['id'])) ?>" class="inline-form">
               <?= csrf_field() ?>
-              <button class="icon-btn" title="<?= (int)$u['status'] === 1 ? 'مسدود کردن' : 'فعال کردن' ?>"><?= icon_svg((int)$u['status'] === 1 ? 'close' : 'check', 16); ?></button>
+              <button class="icon-btn" aria-label="<?= (int)$u['status'] === 1 ? 'مسدود کردن' : 'فعال کردن' ?>"><?= icon_svg((int)$u['status'] === 1 ? 'close' : 'check', 16); ?></button>
             </form>
-            <details class="reset-box">
-              <summary class="icon-btn" title="تغییر رمز"><?= icon_svg('lock', 16); ?></summary>
-              <div class="reset-form">
-                <form method="post" action="<?= e(base_url('admin/user/reset?id=' . $u['id'])) ?>">
-                  <?= csrf_field() ?>
-                  <input type="password" name="password" placeholder="رمز جدید" required dir="ltr">
-                  <button class="btn btn-sm btn-primary" type="submit">تغییر</button>
-                </form>
-              </div>
-            </details>
+            <button type="button" class="icon-btn js-reset-pwd" data-url="<?= e(base_url('admin/user/reset?id=' . $u['id'])) ?>" data-user-name="<?= e($u['name']) ?>" aria-label="تغییر رمز"><?= icon_svg('lock', 16); ?></button>
             <form method="post" action="<?= e(base_url('admin/user/delete?id=' . $u['id'])) ?>" class="inline-form" data-confirm="کاربر و تمام کارت‌هایش حذف می‌شوند. ادامه می‌دهید؟">
               <?= csrf_field() ?>
               <button class="icon-btn icon-danger" title="حذف"><?= icon_svg('trash', 16); ?></button>
@@ -82,3 +73,23 @@ $addOpen  = ($addError !== '' || !empty($addData)); ?>
   <?php endfor; ?>
 </div>
 <?php endif; ?>
+
+<!-- Password Reset Modal Template -->
+<div id="resetPwdModal" class="modal-backdrop" style="display:none" role="dialog" aria-modal="true" aria-labelledby="resetPwdTitle">
+  <div class="modal-card">
+    <div class="modal-icon" style="background:#eef2ff;color:var(--p1)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 17v-5m0-3v-.5M10.3 3.9 2.3 18a2 2 0 0 0 1.7 3h16a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <h3 id="resetPwdTitle">تغییر رمز عبور</h3>
+    <p>برای کاربر <strong id="resetPwdUserName"></strong> رمز جدید تعیین کنید.</p>
+    <form id="resetPwdForm" method="post" action="">
+      <?= csrf_field() ?>
+      <div class="field" style="margin-top:16px">
+        <label>رمز جدید</label>
+        <input type="password" name="password" required dir="ltr" autocomplete="new-password" placeholder="حداقل ۶ کاراکتر">
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost js-modal-close">انصراف</button>
+        <button type="submit" class="btn btn-primary">تغییر رمز</button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -9,12 +9,23 @@ document.addEventListener('DOMContentLoaded', function () {
       menuBtn.setAttribute('aria-expanded', 'false');
       if (backdrop) backdrop.classList.remove('show');
     }
-    menuBtn.addEventListener('click', function () {
+    function openSide() {
       sidebar.classList.add('open');
       menuBtn.setAttribute('aria-expanded', 'true');
       if (backdrop) backdrop.classList.add('show');
-    });
-    if (backdrop) backdrop.addEventListener('click', closeSide);
+    }
+    menuBtn.addEventListener('click', openSide);
+    menuBtn.addEventListener('touchstart', function (e) {
+      e.preventDefault();
+      openSide();
+    }, { passive: false });
+    if (backdrop) {
+      backdrop.addEventListener('click', closeSide);
+      backdrop.addEventListener('touchstart', function (e) {
+        e.preventDefault();
+        closeSide();
+      }, { passive: false });
+    }
     document.addEventListener('click', function (e) {
       if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && e.target !== menuBtn) closeSide();
     });
@@ -87,10 +98,22 @@ document.addEventListener('DOMContentLoaded', function () {
     var msgEl = backdrop.querySelector('p');
     if (msgEl) msgEl.textContent = message;
     function close() { backdrop.remove(); }
+    function trapFocus(element) {
+      var focusable = element.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      var first = focusable[0];
+      var last = focusable[focusable.length - 1];
+      element.addEventListener('keydown', function(e) {
+        if (e.key !== 'Tab') return;
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      });
+    }
+    trapFocus(backdrop);
     backdrop.querySelector('.js-modal-no').addEventListener('click', function () { close(); if (onNo) onNo(); });
     backdrop.querySelector('.js-modal-yes').addEventListener('click', function () { close(); if (onYes) onYes(); });
     backdrop.addEventListener('click', function (e) { if (e.target === backdrop) close(); });
     document.body.appendChild(backdrop);
+    backdrop.querySelector('.js-modal-no').focus();
   };
 
   // ---------- card active toggle (switch) ----------
@@ -111,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var sw = e.target.closest('.js-card-toggle');
     if (!sw) return;
     var url = sw.getAttribute('data-url');
-    var csrf = sw.getAttribute('data-csrf') || '';
+    var csrf = document.querySelector('input[name="csrf_token"]')?.value || '';
     if (!url) return;
     var turningOff = !sw.checked;
     if (!turningOff) { submitToggle(url, csrf); return; }
@@ -142,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!src) return;
     var box = document.createElement('div');
     box.className = 'lightbox-backdrop';
-    box.innerHTML = '<button class="lightbox-close" aria-label="بستن">×</button><img src="' + src + '" alt="">';
+    box.innerHTML = '<button type="button" class="lightbox-close" aria-label="بستن">×</button><img src="' + src + '" alt="">';
     function closeLb() { box.remove(); }
     box.querySelector('.lightbox-close').addEventListener('click', closeLb);
     box.addEventListener('click', function (ev) { if (ev.target === box) closeLb(); });
@@ -150,7 +173,50 @@ document.addEventListener('DOMContentLoaded', function () {
       if (ev.key === 'Escape') { closeLb(); document.removeEventListener('keydown', esc); }
     });
     document.body.appendChild(box);
+    box.querySelector('.lightbox-close').focus();
   });
+
+  // ---------- Password Reset Modal ----------
+  var resetPwdModal = document.getElementById('resetPwdModal');
+  if (resetPwdModal) {
+    var modalCard = resetPwdModal.querySelector('.modal-card');
+    var userNameEl = resetPwdModal.querySelector('#resetPwdUserName');
+    var form = resetPwdModal.querySelector('#resetPwdForm');
+    var closeBtn = resetPwdModal.querySelector('.js-modal-close');
+
+    function openResetModal(btn) {
+      var userName = btn.getAttribute('data-user-name');
+      var url = btn.getAttribute('data-url');
+      userNameEl.textContent = userName;
+      form.action = url;
+      resetPwdModal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+      resetPwdModal.querySelector('input[name="password"]').focus();
+      trapFocus(modalCard);
+    }
+    function closeResetModal() {
+      resetPwdModal.style.display = 'none';
+      document.body.style.overflow = '';
+      form.reset();
+    }
+
+    document.addEventListener('click', function (e) {
+      var btn = e.target.closest('.js-reset-pwd');
+      if (btn) {
+        openResetModal(btn);
+      }
+    });
+
+    if (closeBtn) {
+      closeBtn.addEventListener('click', closeResetModal);
+    }
+    resetPwdModal.addEventListener('click', function (e) {
+      if (e.target === resetPwdModal) closeResetModal();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && resetPwdModal.style.display === 'flex') closeResetModal();
+    });
+  }
 
   // ---------- password strength meter ----------
   document.querySelectorAll('[data-strength]').forEach(function (inp) {
@@ -162,14 +228,22 @@ document.addEventListener('DOMContentLoaded', function () {
     inp.addEventListener('input', function () {
       var v = inp.value;
       var score = 0;
-      if (v.length >= 6) score++;
-      if (v.length >= 10) score++;
-      if (/[a-z]/.test(v) && /[A-Z]/.test(v)) score++;
-      if (/\d/.test(v)) score++;
-      if (/[^A-Za-z0-9]/.test(v)) score++;
-      var labels = ['خیلی ضعیف', 'ضعیف', 'متوسط', 'خوب', 'قوی', 'عالی'];
-      var colors = ['#ef4444', '#ef4444', '#f59e0b', '#eab308', '#22c55e', '#16a34a'];
-      var pct = v === '' ? 0 : Math.max(10, (score / 5) * 100);
+      if (v === '') {
+        score = 0;
+      } else if (v.length < 6) {
+        score = 1; // خیلی ضعیف
+      } else if (/^\d+$/.test(v)) {
+        score = 1; // فقط عدد = ضعیف
+      } else if (/[A-Za-z]/.test(v) && /\d/.test(v) && /[^A-Za-z0-9]/.test(v)) {
+        score = v.length >= 10 ? 5 : 4; // حروف + عدد + کاراکتر خاص = عالی/قوی
+      } else if (/[A-Za-z]/.test(v) && /\d/.test(v)) {
+        score = 3; // حروف + عدد = خوب
+      } else {
+        score = 2; // فقط حروف = متوسط
+      }
+      var labels = ['', 'خیلی ضعیف', 'ضعیف', 'متوسط', 'خوب', 'قوی', 'عالی'];
+      var colors = ['', '#ef4444', '#ef4444', '#f59e0b', '#22c55e', '#16a34a', '#059669'];
+      var pct = v === '' ? 0 : (score === 0 ? 0 : (score / 5) * 100);
       if (bar) { bar.style.width = pct + '%'; bar.style.background = colors[score]; }
       if (txt) txt.textContent = v === '' ? '' : labels[score];
     });

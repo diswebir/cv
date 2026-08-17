@@ -53,7 +53,7 @@
     <div class="mini-list">
       <?php foreach ($cards as $c): ?>
       <div class="mini-row">
-        <div class="mini-qr-sm"><img src="<?= e(card_qr_url($c, 'px=8')) ?>" alt=""></div>
+        <div class="mini-qr-sm"><img src="<?= e(card_qr_url($c, 'px=8')) ?>" alt="QR کارت <?= e($c['full_name'] ?: 'بدون نام') ?>"></div>
         <div class="mini-meta"><strong><?= e($c['full_name'] ?: 'بدون نام') ?></strong><span><?= e($c['owner_name']) ?> • <?= fa_num_format($c['visits']) ?> بازدید</span></div>
         <span class="chip <?= (int)$c['active'] === 1 ? 'chip-on' : 'chip-off' ?>"><?= (int)$c['active'] === 1 ? 'فعال' : 'غیرفعال' ?></span>
       </div>

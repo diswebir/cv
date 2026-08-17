@@ -170,14 +170,18 @@ function admin_settings() {
     );
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         csrf_check();
-        $appName = clean_text(post('app_name'), 80) !== '' ? clean_text(post('app_name'), 80) : 'کارت ویزیت من';
+        $appName = clean_text(post('app_name'), 80) !== '' ? clean_text(post('app_name'), 80) : 'cv4u';
         $baseUrl = rtrim(clean_text(post('base_url'), 200), '/');
         $allowReg = post('allow_registration') === '1' ? '1' : '0';
         $footer = clean_text(post('footer_text'), 500);
         if ($baseUrl === '') $baseUrl = $detected;
-        if (!preg_match('#^https?://#i', $baseUrl)) {
-            $error = 'آدرس پایه باید با http:// یا https:// شروع شود.';
+        // Use sanitize_base_url from install.php for proper validation
+        require_once VC_ROOT . '/install.php';
+        $sanitized = sanitize_base_url($baseUrl);
+        if ($sanitized === '') {
+            $error = 'آدرس پایه نامعتبر است. فقط http/https و کاراکترهای مجاز hostname/path مجاز هستند.';
         } else {
+            $baseUrl = $sanitized;
             $len = (int)post('code_length', 6);
             if ($len < 4 || $len > 12) $len = 6;
             set_setting('app_name', $appName);

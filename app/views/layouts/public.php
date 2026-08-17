@@ -1,4 +1,4 @@
-<?php $siteName = (string)get_setting('app_name', 'کارت ویزیت من'); ?>
+<?php $siteName = (string)get_setting('app_name', 'cv4u'); ?>
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -36,6 +36,7 @@
 <footer class="site-footer">
   <div class="container">
     <p>© <?= fa_num(date('Y')) ?> <?= e($siteName) ?> — تمامی حقوق محفوظ است.<?php $ft = trim((string)get_setting('footer_text', '')); if ($ft !== '') echo '<br>' . e($ft); ?></p>
+    <p class="footer-credit">ساخته شده با <?= icon_svg('heart', 14); ?> توسط <a href="https://disweb.ir" target="_blank" rel="noopener">رضا جنترانی</a></p>
   </div>
 </footer>
 <script src="<?= e(asset('js/app.js')) ?>"></script>

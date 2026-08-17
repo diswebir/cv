@@ -14,7 +14,7 @@
     <tbody>
       <?php foreach ($list['rows'] as $c): ?>
       <tr>
-        <td><div class="td-user"><div class="mini-qr-sm"><img src="<?= e(card_qr_url($c, 'px=8')) ?>" alt=""></div><div><strong><?= e($c['full_name'] ?: 'بدون نام') ?></strong><span class="td-sub"><?= e($c['company']) ?></span></div></div></td>
+        <td><div class="td-user"><div class="mini-qr-sm"><img src="<?= e(card_qr_url($c, 'px=8')) ?>" alt="QR کارت <?= e($c['full_name'] ?: 'بدون نام') ?>"></div><div><strong><?= e($c['full_name'] ?: 'بدون نام') ?></strong><span class="td-sub"><?= e($c['company']) ?></span></div></div></td>
         <td dir="ltr"><?= e($c['code']) ?></td>
         <td><?= e($c['owner_name']) ?></td>
         <td><?= fa_num_format($c['visits']) ?></td>
@@ -22,13 +22,13 @@
         <td><?= fa_date(strtotime($c['created_at'])) ?></td>
         <td>
           <div class="td-actions">
-            <a class="icon-btn" target="_blank" rel="noopener" href="<?= e(card_public_url($c)) ?>" title="مشاهده"><?= icon_svg('eye', 16); ?></a>
+            <a class="icon-btn" target="_blank" rel="noopener" href="<?= e(card_public_url($c)) ?>" aria-label="مشاهده کارت"><?= icon_svg('eye', 16); ?></a>
             <label class="mini-switch" title="<?= (int)$c['active'] === 1 ? 'غیرفعال کردن' : 'فعال کردن' ?>">
-              <input type="checkbox" class="js-card-toggle" <?= (int)$c['active'] === 1 ? 'checked' : '' ?> data-url="<?= e(base_url('admin/card/toggle?id=' . $c['id'])) ?>" data-csrf="<?= e(csrf_token()) ?>">
+              <input type="checkbox" class="js-card-toggle" <?= (int)$c['active'] === 1 ? 'checked' : '' ?> data-url="<?= e(base_url('admin/card/toggle?id=' . $c['id'])) ?>">
               <span class="ms-track"></span>
             </label>
             <details class="reset-box">
-              <summary class="icon-btn" title="تغییر کد کوتاه"><?= icon_svg('link', 16); ?></summary>
+              <summary class="icon-btn" aria-label="تغییر کد کوتاه"><?= icon_svg('link', 16); ?></summary>
               <div class="reset-form">
                 <form method="post" action="<?= e(base_url('admin/card/code?id=' . $c['id'])) ?>">
                   <?= csrf_field() ?>

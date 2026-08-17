@@ -26,7 +26,7 @@ foreach ($chart['counts'] as $c) $chartMax = max($chartMax, (int)$c);
 <div class="qr-and-stats">
   <div class="qr-panel">
     <div class="qr-panel-img">
-      <img src="<?= e(card_qr_url($card, 'px=14')) ?>" alt="QR کارت">
+      <img src="<?= e(card_qr_url($card, 'px=14')) ?>" alt="QR کارت <?= e($card['full_name'] ?: 'بدون نام') ?>">
     </div>
     <div class="qr-panel-actions">
       <a class="btn btn-sm btn-primary" href="<?= e(card_qr_url($card, 'px=30&download=1')) ?>" download><?= icon_svg('download', 15); ?> دانلود PNG</a>

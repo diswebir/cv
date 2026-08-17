@@ -14,6 +14,7 @@
   --line:#e2e8f0;
   --c1:#4f46e5;
   --c2:#7c3aed;
+  --green:#16a34a;
   --shadow:0 6px 22px rgba(15,23,42,.07);
 }
 /* متغیرهای مشتق‌شده (--c1-soft، --c1-glow و ...) توسط card_head در PHP محاسبه و
@@ -40,7 +41,7 @@ img{max-width:100%}
 .save-btn:hover{transform:translateY(-1px)}
 
 .act-row{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:14px}
-.act-btn{display:flex;flex-direction:column;align-items:center;gap:6px;border-radius:13px;padding:11px 4px;font-size:11.5px;font-weight:600;transition:.15s}
+.act-btn{display:flex;flex-direction:column;align-items:center;gap:6px;border-radius:13px;padding:14px 8px;min-height:44px;font-size:13px;font-weight:600;transition:.15s}
 .act-btn:hover{box-shadow:var(--shadow);transform:translateY(-1px)}
 @media(max-width:360px){.act-row{grid-template-columns:repeat(2,1fr)}}
 
@@ -88,10 +89,24 @@ img{max-width:100%}
 .share-block{text-align:center;margin-top:6px}
 .share-label{font-size:12px;display:block;margin-bottom:9px}
 .share-row{display:flex;gap:10px;justify-content:center}
-.share-btn{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit;transition:.15s}
+.share-btn{width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit;transition:.15s}
 
 .card-foot{text-align:center;padding:18px 0 0;font-size:12px}
 .card-foot a:hover{opacity:.8}
+
+/* ---------- focus-visible styles for accessibility ---------- */
+.act-btn:focus-visible,
+.soc-btn:focus-visible,
+.save-btn:focus-visible,
+.share-btn:focus-visible,
+.map-open:focus-visible,
+.qr-link:focus-visible,
+.card-foot a:focus-visible,
+.il-arrow:focus-visible {
+  outline: 2px solid var(--c1);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
 
 /* ---------- toast ---------- */
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:#0f172a;color:#fff;padding:11px 20px;border-radius:12px;font-size:13px;font-weight:600;box-shadow:0 12px 30px rgba(0,0,0,.3);transition:.3s;z-index:99;opacity:0;pointer-events:none}
@@ -146,6 +161,7 @@ img{max-width:100%}
 .tpl-dark .id-text{padding:0 2px;min-width:0}
 .tpl-dark .name{font-size:22px;color:#f8fafc}
 .tpl-dark .role{color:var(--c1-light);font-weight:600}
+.tpl-dark .company{color:#cbd5e1}
 .tpl-dark .company{color:#94a3b8}
 .tpl-dark .save-btn{background:var(--grad);color:#fff;box-shadow:0 8px 24px var(--c1-glow)}
 .tpl-dark .save-btn:hover{box-shadow:0 11px 30px var(--c1-glow)}
@@ -302,8 +318,8 @@ img{max-width:100%}
 .tpl-neon .neon-logo.logo-left{justify-content:flex-end}
 .tpl-neon .card-logo{width:100px;height:100px;border-radius:50%;border:2px solid var(--c1-bright);box-shadow:0 0 0 6px var(--c1-faint),0 0 30px var(--c1-glow)}
 .tpl-neon .neon-name{margin-top:20px;font-size:25px;font-weight:900;background:linear-gradient(90deg,var(--c1),var(--c2),var(--c2-light));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 16px var(--c1-glow))}
-.tpl-neon .role{color:#9ca3af}
-.tpl-neon .company{color:#7d8396}
+.tpl-neon .role{color:#d1d5db}
+.tpl-neon .company{color:#9ca3af}
 .tpl-neon .save-btn{background:linear-gradient(90deg,var(--c1),var(--c2));color:#fff;box-shadow:0 8px 28px var(--c2-glow)}
 .tpl-neon .save-btn:hover{box-shadow:0 10px 34px var(--c2-glow);transform:translateY(-1px)}
 .tpl-neon .act-btn{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);color:#e2e8f0}
@@ -315,7 +331,7 @@ img{max-width:100%}
 .tpl-neon .info-list{background:transparent;box-shadow:none;margin-bottom:0}
 .tpl-neon .info-list li{border-bottom:1px solid rgba(255,255,255,.07)}
 .tpl-neon .il-icon{background:var(--c2-faint);color:var(--c2-light)}
-.tpl-neon .il-label{color:#8b8fa3}
+.tpl-neon .il-label{color:#9ca3af}
 .tpl-neon .il-value{color:#f1f5f9}
 .tpl-neon .il-arrow{color:#5c6074}
 .tpl-neon .socials-row{background:rgba(255,255,255,.04);border:1px solid var(--c1-glow);box-shadow:0 0 22px var(--c1-faint)}
@@ -324,6 +340,16 @@ img{max-width:100%}
 .tpl-neon .share-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:#e2e8f0}
 .tpl-neon .share-btn:hover{border-color:var(--c1);color:var(--c1-light);box-shadow:0 0 14px var(--c1-glow)}
 .tpl-neon .card-foot{color:#5c6074}
+
+/* ---------- Reduced motion support ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
 
 /* ---------- گوشه‌ی مشترک: در تم‌های تیره جعبه QR همیشه روشن بماند ---------- */
 .tpl-dark .qr-inner,.tpl-neon .qr-inner{background:#fff;border:1px solid rgba(255,255,255,.15)}

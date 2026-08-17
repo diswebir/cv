@@ -4,7 +4,7 @@ $name = $card['full_name'] ?: 'کارت ویزیت';
 $logoPos = card_logo_pos($card);
 card_head($name, $card);
 ?>
-<main class="card-shell tpl-business">
+<main class="card-shell tpl-business" id="cardMain">
   <header class="card-header business-head">
     <div class="card-cover"></div>
     <span class="biz-corner c-tl"></span><span class="biz-corner c-tr"></span><span class="biz-corner c-bl"></span><span class="biz-corner c-br"></span>

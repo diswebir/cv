@@ -19,6 +19,14 @@ function set_setting($k, $v) {
     $st->execute(array($k, (string)$v));
     if (!isset($GLOBALS['__set_cache']) || !is_array($GLOBALS['__set_cache'])) $GLOBALS['__set_cache'] = array();
     $GLOBALS['__set_cache'][$k] = (string)$v;
+    // Invalidate base_url cache version when base_url is changed
+    if ($k === 'base_url') {
+        $ver = (int)get_setting('__base_url_version', 0);
+        $st2 = db()->prepare('INSERT INTO settings (skey, svalue) VALUES (?, ?)
+            ON DUPLICATE KEY UPDATE svalue = VALUES(svalue)');
+        $st2->execute(array('__base_url_version', (string)($ver + 1)));
+        $GLOBALS['__set_cache']['__base_url_version'] = (string)($ver + 1);
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -74,11 +82,13 @@ function list_users($search = '', $page = 1, $per = 20) {
         $vals[] = '%' . $search . '%';
     }
     $off = max(0, ((int)$page - 1) * (int)$per);
-    $st = db()->prepare('SELECT * FROM users ' . $where . ' ORDER BY id DESC LIMIT ' . (int)$per . ' OFFSET ' . $off);
+    $st = db()->prepare('SELECT * FROM users ' . $where . ' ORDER BY id DESC LIMIT ? OFFSET ?');
+    $vals[] = (int)$per;
+    $vals[] = $off;
     $st->execute($vals);
     $rows = $st->fetchAll();
     $st2 = db()->prepare('SELECT COUNT(*) AS c FROM users ' . $where);
-    $st2->execute($vals);
+    $st2->execute(array_slice($vals, 0, -2));
     return array('rows' => $rows, 'total' => (int)$st2->fetch()['c']);
 }
 
@@ -128,7 +138,9 @@ function is_valid_card_code($code) {
 }
 
 function unique_card_code() {
-    $len = card_code_length();
+    static $lenCache = null;
+    if ($lenCache === null) $lenCache = card_code_length();
+    $len = $lenCache;
     for ($i = 0; $i < 20; $i++) {
         $code = random_code($len);
         if (!is_reserved_code($code) && !get_card_by_code($code)) return $code;
@@ -207,6 +219,8 @@ function update_card($id, $data) {
         }
     }
     if (empty($sets)) return;
+    // Explicitly update updated_at for MySQL compatibility
+    $sets[] = 'updated_at = CURRENT_TIMESTAMP';
     $vals[] = (int)$id;
     $st = db()->prepare('UPDATE cards SET ' . implode(', ', $sets) . ' WHERE id = ?');
     $st->execute($vals);
@@ -238,12 +252,14 @@ function list_cards($search = '', $page = 1, $per = 20, $user_id = null) {
     }
     $w = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
     $off = max(0, ((int)$page - 1) * (int)$per);
+    $vals[] = (int)$per;
+    $vals[] = $off;
     $st = db()->prepare('SELECT c.*, u.name AS owner_name FROM cards c LEFT JOIN users u ON u.id = c.user_id '
-        . $w . ' ORDER BY c.id DESC LIMIT ' . (int)$per . ' OFFSET ' . $off);
+        . $w . ' ORDER BY c.id DESC LIMIT ? OFFSET ?');
     $st->execute($vals);
     $rows = $st->fetchAll();
     $st2 = db()->prepare('SELECT COUNT(*) AS c FROM cards c ' . $w);
-    $st2->execute($vals);
+    $st2->execute(array_slice($vals, 0, -2)); // exclude LIMIT/OFFSET
     return array('rows' => $rows, 'total' => (int)$st2->fetch()['c']);
 }
 

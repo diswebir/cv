@@ -70,10 +70,13 @@ class VQR {
         if (!isset(self::$themes[$theme])) $theme = 'classic';
         $dots = isset($opts['dots']) ? (string)$opts['dots'] : 'square';
         if (!in_array($dots, self::$dots, true)) $dots = 'square';
+        // Limit px to max 20 to prevent memory exhaustion
+        $px = isset($opts['px']) ? max(1, (int)$opts['px']) : 10;
+        if ($px > 20) $px = 20;
         return array(
             'theme' => $theme,
             'dots' => $dots,
-            'px' => isset($opts['px']) ? max(1, (int)$opts['px']) : 10,
+            'px' => $px,
             'margin' => isset($opts['margin']) ? max(0, (int)$opts['margin']) : 3,
             'ecc' => isset($opts['ecc']) ? (string)$opts['ecc'] : 'H',
             'logo' => isset($opts['logo']) ? (string)$opts['logo'] : '',
@@ -338,7 +341,23 @@ class VQR {
 
     private static function logo_path($rel) {
         if ($rel === '' || !is_string($rel)) return null;
-        $p = VC_ROOT . '/' . ltrim($rel, '/');
+        // Normalize path and prevent directory traversal
+        $rel = ltrim($rel, '/');
+        $rel = str_replace('\\', '/', $rel);
+        // Resolve any . or .. components
+        $parts = array();
+        foreach (explode('/', $rel) as $part) {
+            if ($part === '' || $part === '.') continue;
+            if ($part === '..') {
+                array_pop($parts);
+            } else {
+                $parts[] = $part;
+            }
+        }
+        $safePath = implode('/', $parts);
+        // Must be inside uploads directory for security
+        if (strpos($safePath, 'uploads/') !== 0) return null;
+        $p = VC_ROOT . '/' . $safePath;
         return is_file($p) ? $p : null;
     }
 

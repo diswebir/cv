@@ -33,7 +33,15 @@ function require_login() {
         // Strip the app path prefix so redirect() builds a clean URL.
         $prefix = path_prefix();
         if ($prefix !== '' && strpos($req, $prefix) === 0) $req = ltrim(substr($req, strlen($prefix)), '/');
-        if ($req !== '' && $req !== 'login' && preg_match('#^[a-zA-Z0-9_\-/]{1,120}$#', $req)) {
+        // Whitelist allowed redirect paths to prevent open redirect
+        $allowedPaths = array(
+            '', 'panel', 'panel/', 'panel/dashboard', 'panel/cards', 'panel/card',
+            'panel/profile', 'panel/settings', 'admin', 'admin/', 'admin/dashboard',
+            'admin/users', 'admin/cards', 'admin/settings', 'login', 'register', 'logout',
+            'qr', 'vcf', 'c'
+        );
+        // Only allow simple paths (no query strings, no .. or multiple slashes)
+        if ($req !== '' && $req !== 'login' && in_array($req, $allowedPaths, true)) {
             redirect('login?next=' . $req);
         }
         redirect('login');
@@ -54,20 +62,20 @@ function require_admin() {
  */
 function login_rate_limited($email) {
     $ip = client_ip();
-    if (rate_limit_blocked('login_ip_' . md5($ip), 'x', 10, 900)) return true;
-    if (rate_limit_blocked('login_email_' . md5(strtolower((string)$email)), 'x', 5, 900)) return true;
+    if (rate_limit_blocked('login_ip_' . hash('sha256', $ip), 'x', 10, 900)) return true;
+    if (rate_limit_blocked('login_email_' . hash('sha256', strtolower((string)$email)), 'x', 5, 900)) return true;
     return false;
 }
 
 function login_rate_fail($email) {
     // Record a failed attempt for both the IP and the email buckets.
-    rate_limit_hit('login_ip_' . md5(client_ip()), 'x', 10, 900);
-    rate_limit_hit('login_email_' . md5(strtolower((string)$email)), 'x', 5, 900);
+    rate_limit_hit('login_ip_' . hash('sha256', client_ip()), 'x', 10, 900);
+    rate_limit_hit('login_email_' . hash('sha256', strtolower((string)$email)), 'x', 5, 900);
 }
 
 function login_rate_reset($email) {
-    rate_limit_reset('login_ip_' . md5(client_ip()), 'x');
-    rate_limit_reset('login_email_' . md5(strtolower((string)$email)), 'x');
+    rate_limit_reset('login_ip_' . hash('sha256', client_ip()), 'x');
+    rate_limit_reset('login_email_' . hash('sha256', strtolower((string)$email)), 'x');
 }
 
 function attempt_login($email, $password) {
@@ -85,6 +93,15 @@ function attempt_login($email, $password) {
         login_rate_fail($email);
         return array('ok' => false, 'error' => 'حساب شما غیرفعال شده است. با مدیر تماس بگیرید.');
     }
+    
+    // Rehash password if needed (e.g., algorithm/cost updates)
+    if (password_needs_rehash($user['password'], PASSWORD_DEFAULT)) {
+        $newHash = password_hash($password, PASSWORD_DEFAULT);
+        $st = db()->prepare('UPDATE users SET password = ? WHERE id = ?');
+        $st->execute(array($newHash, (int)$user['id']));
+        $user['password'] = $newHash;
+    }
+    
     login_rate_reset($email);
     session_regenerate_id(true);
     $_SESSION['user_id'] = (int)$user['id'];
@@ -105,7 +122,7 @@ function register_user($name, $email, $password) {
     $email = strtolower(trim((string)$email));
     if ($name === '') return array('ok' => false, 'error' => 'نام را وارد کنید.');
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) return array('ok' => false, 'error' => 'ایمیل معتبر نیست.');
-    if (mb_strlen($password) < 6) return array('ok' => false, 'error' => 'رمز عبور باید حداقل ۶ کاراکتر باشد. از ترکیب حروف و عدد استفاده کنید تا امن‌تر باشد.');
+    if (mb_strlen($password) < 6) return array('ok' => false, 'error' => 'رمز عبور باید حداقل ۶ کاراکتر باشد.');
     $existing = get_user_by_email($email);
     if ($existing) return array('ok' => false, 'error' => 'این ایمیل قبلاً ثبت شده است.');
     $id = create_user($name, $email, $password, 'user');

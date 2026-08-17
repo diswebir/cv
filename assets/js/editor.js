@@ -29,8 +29,9 @@ document.addEventListener('DOMContentLoaded', function () {
   tabs.forEach(function (tab, i) {
     tab.addEventListener('click', function () { showTab(i); });
     tab.addEventListener('keydown', function (e) {
-      if (e.key === 'ArrowLeft') { showTab(Math.min(tabs.length - 1, i + 1)); tabs[i + 1] && tabs[i + 1].focus(); }
-      if (e.key === 'ArrowRight') { showTab(Math.max(0, i - 1)); tabs[i - 1] && tabs[i - 1].focus(); }
+      // RTL: ArrowRight = next, ArrowLeft = previous
+      if (e.key === 'ArrowRight') { showTab(Math.min(tabs.length - 1, i + 1)); tabs[i + 1] && tabs[i + 1].focus(); }
+      if (e.key === 'ArrowLeft') { showTab(Math.max(0, i - 1)); tabs[i - 1] && tabs[i - 1].focus(); }
     });
   });
   if (nextBtn) nextBtn.addEventListener('click', function () {
@@ -59,6 +60,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     function refreshPreview() {
       var p = qrParams(true);
+      preview.style.opacity = '0.5';
+      preview.onload = function() { preview.style.opacity = '1'; };
+      preview.onerror = function() {
+        preview.style.opacity = '1';
+        preview.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMjAiIGhlaWdodD0iMjIwIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZWVlIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIj7RhJ3RhJ3RhJ08L3RleHQ+PC9zdmc+';
+        showToast('خطا در تولید QR؛ مجدداً تلاش کنید');
+      };
       preview.src = base + '?' + p;
       var dlPng = document.getElementById('qrDlPng');
       var dlSvg = document.getElementById('qrDlSvg');
@@ -87,9 +95,12 @@ document.addEventListener('DOMContentLoaded', function () {
     function addRow(label, value) {
       var row = document.createElement('div');
       row.className = 'cf-row';
-      row.innerHTML = '<input type="text" name="cf_label[]" placeholder="عنوان (مثلاً ساعات کاری)" value="' + esc(label) + '">'
-        + '<input type="text" name="cf_value[]" placeholder="مقدار" value="' + esc(value) + '">'
-        + '<button type="button" class="icon-btn icon-danger cf-remove" aria-label="حذف">×</button>';
+      var idx = Date.now();
+      row.innerHTML = '<label for="cf_label_' + idx + '" class="sr-only">عنوان فیلد</label>'
+        + '<input type="text" name="cf_label[]" id="cf_label_' + idx + '" placeholder="عنوان (مثلاً ساعات کاری)" value="' + esc(label) + '">'
+        + '<label for="cf_value_' + idx + '" class="sr-only">مقدار فیلد</label>'
+        + '<input type="text" name="cf_value[]" id="cf_value_' + idx + '" placeholder="مقدار" value="' + esc(value) + '">'
+        + '<button type="button" class="icon-btn icon-danger cf-remove" aria-label="حذف فیلد">×</button>';
       cfRows.appendChild(row);
     }
     cfAdd.addEventListener('click', function () { addRow('', ''); });

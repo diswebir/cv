@@ -4,10 +4,18 @@ Options -Indexes
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
+  # RewriteBase for subdirectory installations (e.g. /vcard/)
+  # If installed in a subdirectory, uncomment and set the path below:
+  # RewriteBase /vcard/
+
   # ۱) اول از همه: مسدود کردن دسترسی مستقیم به پوشه‌های حساس و فایل‌های پنهان
   RewriteRule ^(includes|app)(/|$) - [F,L]
   RewriteRule ^\. - [F,L]
   RewriteRule \.(sql|md|log)$ - [F,L]
+  # مسدود کردن install.php وقتی config.php وجود دارد
+  RewriteCond %{REQUEST_FILENAME} install\.php$
+  RewriteCond %{DOCUMENT_ROOT}/includes/config.php -f
+  RewriteRule ^ - [F,L]
 
   # ۲) فایل‌ها و پوشه‌های واقعی (assets/ ، uploads/ و ...) مستقیم سرو شوند
   RewriteCond %{REQUEST_FILENAME} -f [OR]
@@ -18,7 +26,7 @@ Options -Indexes
   RewriteRule ^ index.php [L]
 </IfModule>
 
-<FilesMatch "^\\.htaccess">
+<FilesMatch "^\.htaccess">
   <IfModule mod_authz_core.c>
     Require all denied
   </IfModule>

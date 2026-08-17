@@ -102,9 +102,10 @@ function card_head($title, $card) {
     if ($card['email']) $ld['email'] = $card['email'];
     if ($card['phone']) $ld['telephone'] = $card['phone'];
     if ($cardImg) $ld['image'] = $cardImg;
-    echo '<script type="application/ld+json">' . json_encode($ld, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . '</script>';
+    echo '<script type="application/ld+json">' . json_encode($ld, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS) . '</script>';
 
     echo '</head><body class="card-page tpl-' . $tpl . '">';
+    echo '<a class="skip-link" href="#cardMain">پرش به محتوای اصلی</a>';
 }
 
 function card_initials($name) {
@@ -127,7 +128,7 @@ function c_logo($card, $size = '') {
     if (!empty($card['logo'])) {
         return '<img class="card-logo ' . $size . '" src="' . e(upload_url($card['logo'])) . '" alt="' . e($card['full_name']) . '" loading="lazy" data-lightbox="' . e(upload_url($card['logo'])) . '">';
     }
-    return '<span class="card-logo card-logo-ph ' . $size . '">' . e(card_initials($card['full_name'])) . '</span>';
+    return '<span class="card-logo card-logo-ph ' . $size . '" role="img" aria-label="' . e(card_initials($card['full_name'])) . '">' . e(card_initials($card['full_name'])) . '</span>';
 }
 
 function c_save_btn($card) {
@@ -194,10 +195,13 @@ function c_bio($card) {
 
 function c_map($card) {
     if (!$card['map_lat'] || !$card['map_lng']) return;
+    // Privacy: if map_address is set, use it for embed instead of raw coordinates
+    // This hides exact coordinates from the public page
     $lat = (float)$card['map_lat'];
     $lng = (float)$card['map_lng'];
-    $embed = 'https://maps.google.com/maps?q=' . $lat . ',' . $lng . '&z=16&output=embed';
-    $open = 'https://www.google.com/maps?q=' . $lat . ',' . $lng;
+    $embedQuery = $card['map_address'] ? rawurlencode($card['map_address']) : $lat . ',' . $lng;
+    $embed = 'https://maps.google.com/maps?q=' . $embedQuery . '&z=16&output=embed';
+    $open = 'https://www.google.com/maps?q=' . $embedQuery;
     echo '<section class="card-block map-block">';
     echo '<h3 class="blk-title">' . icon_svg('map-pin', 17) . ($card['map_address'] ? e($card['map_address']) : 'موقعیت مکانی') . '</h3>';
     echo '<div class="map-frame"><iframe src="' . e($embed) . '" loading="lazy" lang="fa" title="نقشه موقعیت کارت ویزیت" referrerpolicy="no-referrer-when-downgrade"></iframe></div>';
@@ -218,8 +222,9 @@ function c_qr_block($card) {
     $qr = card_qr_url($card, 'px=13');
     echo '<section class="card-block qr-block">';
     echo '<h3 class="blk-title">اسکن کنید تا کارت من را ببینید</h3>';
-    echo '<div class="qr-inner"><img src="' . e($qr) . '" alt="کد QR کارت" loading="lazy"></div>';
-    echo '<a class="qr-link" href="' . e(card_public_url($card)) . '" dir="ltr">' . e(card_public_url($card)) . '</a>';
+    $url = card_public_url($card);
+    echo '<div class="qr-inner"><img src="' . e($qr) . '" alt="QR code linking to ' . e($card['full_name'] ?: 'Digital Business Card') . '\'s digital business card at ' . e($url) . '" loading="lazy"></div>';
+    echo '<a class="qr-link" href="' . e($url) . '" dir="ltr">' . e($url) . '</a>';
     echo '</section>';
 }
 
@@ -239,6 +244,6 @@ function c_share($card) {
 }
 
 function c_footer() {
-    $app = (string)get_setting('app_name', 'کارت ویزیت من');
+    $app = (string)get_setting('app_name', 'cv4u');
     echo '<footer class="card-foot"><a href="' . e(base_url('')) . '">ساخته شده با ' . e($app) . '</a></footer>';
 }

@@ -4,7 +4,7 @@ $name = $card['full_name'] ?: 'کارت ویزیت';
 $logoPos = card_logo_pos($card);
 card_head($name, $card);
 ?>
-<main class="card-shell tpl-gradient">
+<main class="card-shell tpl-gradient" id="cardMain">
   <header class="card-header gradient-hero">
     <div class="card-cover"></div>
     <div class="gradient-orb o1"></div>

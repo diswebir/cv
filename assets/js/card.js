@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!toastEl) {
       toastEl = document.createElement('div');
       toastEl.className = 'toast';
+      toastEl.setAttribute('role', 'status');
+      toastEl.setAttribute('aria-live', 'polite');
       document.body.appendChild(toastEl);
     }
     toastEl.textContent = msg;
@@ -33,7 +35,13 @@ document.addEventListener('DOMContentLoaded', function () {
   // ---------- copy link ----------
   document.querySelectorAll('.js-copy').forEach(function (btn) {
     btn.addEventListener('click', function () {
-      copyText(btn.getAttribute('data-copy') || '', function () { showToast('لینک کپی شد ✓'); });
+      copyText(btn.getAttribute('data-copy') || '', function () {
+        showToast('لینک کپی شد ✓');
+        var originalHtml = btn.innerHTML;
+        btn.innerHTML = '✓ کپی شد';
+        btn.style.background = 'var(--green)';
+        setTimeout(function() { btn.innerHTML = originalHtml; btn.style.background = ''; }, 1500);
+      });
     });
   });
 

@@ -6,7 +6,7 @@
     <div class="form-grid">
       <div class="field span2">
         <label>نام سایت</label>
-        <input type="text" name="app_name" value="<?= e(get_setting('app_name', 'کارت ویزیت من')) ?>" maxlength="80">
+        <input type="text" name="app_name" value="<?= e(get_setting('app_name', 'cv4u')) ?>" maxlength="80">
       </div>
       <div class="field span2">
         <label>آدرس پایه (Base URL) — مبنای لینک‌های کوتاه</label>

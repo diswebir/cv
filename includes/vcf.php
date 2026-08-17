@@ -55,8 +55,10 @@ function send_vcf($card) {
     $base = preg_replace('/[^a-zA-Z0-9]+/', '-', mb_substr((string)$card['full_name'], 0, 30));
     $base = trim($base, '-');
     if ($base === '') $base = 'contact';
+    // RFC 5987 encoding for safe filename in Content-Disposition
+    $encoded = rawurlencode($base);
     header('Content-Type: text/x-vcard; charset=utf-8');
-    header('Content-Disposition: attachment; filename="' . $base . '.vcf"');
+    header('Content-Disposition: attachment; filename="' . $encoded . '.vcf"; filename*=UTF-8\'\'' . $encoded . '.vcf');
     echo build_vcard($card);
     exit;
 }
