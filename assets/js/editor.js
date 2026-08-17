@@ -20,13 +20,10 @@ document.addEventListener('DOMContentLoaded', function () {
     panels.forEach(function (p) { p.hidden = true; });
     var panel = form.querySelector('.etab[data-panel="' + tabs[idx].getAttribute('data-tab') + '"]');
     if (panel) panel.hidden = false;
+    var isFirst = idx === 0;
     var isLast = idx === tabs.length - 1;
     if (nextBtn) nextBtn.hidden = isLast;
-    // Save button is always visible in the sticky save bar.
-    if (prevBtn) prevBtn.hidden = idx === 0;
-    // In first tab, prevBtn hidden; in last tab, nextBtn hidden
-    if (prevBtn) prevBtn.hidden = idx === 0;
-    if (nextBtn) nextBtn.hidden = isLast;
+    if (prevBtn) prevBtn.hidden = isFirst;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
   tabs.forEach(function (tab, i) {

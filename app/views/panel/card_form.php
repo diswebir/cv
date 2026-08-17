@@ -235,7 +235,7 @@ $demoData = 'https://example.com';
     </div>
 
     <div class="editor-save-bar">
-      <button type="button" class="btn btn-lg btn-ghost" id="formPrevBtn" hidden>قبلی</button>
+      <button type="button" class="btn btn-lg btn-ghost" id="formPrevBtn">قبلی</button>
       <button type="button" class="btn btn-lg btn-primary" id="formNextBtn">بعدی</button>
       <span class="saved-hint">تغییرات ذخیره نشده دارید — برای اعمال، دکمه ذخیره را بزنید.</span>
       <button type="submit" class="btn btn-lg btn-primary" id="formSaveBtn"><?= $card ? 'ذخیره تغییرات' : 'ساخت کارت' ?></button>
