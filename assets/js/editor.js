@@ -24,6 +24,9 @@ document.addEventListener('DOMContentLoaded', function () {
     if (nextBtn) nextBtn.hidden = isLast;
     // Save button is always visible in the sticky save bar.
     if (prevBtn) prevBtn.hidden = idx === 0;
+    // In first tab, prevBtn hidden; in last tab, nextBtn hidden
+    if (prevBtn) prevBtn.hidden = idx === 0;
+    if (nextBtn) nextBtn.hidden = isLast;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
   tabs.forEach(function (tab, i) {
@@ -178,6 +181,18 @@ document.addEventListener('DOMContentLoaded', function () {
       }, { enableHighAccuracy: false, timeout: 10000 });
     });
   }
+
+  // ---------- form submit: open QR page in new tab after save ----------
+  form.addEventListener('submit', function (e) {
+    // After successful submit, open QR page in new tab
+    setTimeout(function () {
+      var codeInput = form.querySelector('input[name="code"]');
+      var code = codeInput ? codeInput.value : '';
+      if (code) {
+        window.open('qr/' + code + '.png', '_blank');
+      }
+    }, 500);
+  });
 
   // ---------- فعال/غیرفعال کردن کارت (با تأیید) ----------
   var activeChk = document.getElementById('activeChk');
