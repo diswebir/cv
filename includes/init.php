@@ -10,6 +10,7 @@ define('VC_INC', __DIR__);
 define('VC_UPLOAD_DIR', VC_ROOT . '/uploads');
 
 require_once VC_INC . '/helpers.php';
+require_once VC_INC . '/constants.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_set_cookie_params(array(
@@ -17,7 +18,7 @@ if (session_status() === PHP_SESSION_NONE) {
         'path' => path_prefix(), // dynamic for subdirectory installs
         'secure' => is_https(),
         'httponly' => true,
-        'samesite' => 'Lax',
+        'samesite' => 'Strict',
     ));
     session_name('vcsess');
     session_start();
@@ -68,8 +69,17 @@ date_default_timezone_set((string)config('timezone', 'Asia/Tehran'));
 if (function_exists('mb_internal_encoding')) mb_internal_encoding('UTF-8');
 
 // Content Security Policy headers
+// Use per-request nonce so we can drop 'unsafe-inline' for script-src.
+if (!isset($GLOBALS['__csp_nonce'])) {
+    try {
+        $GLOBALS['__csp_nonce'] = bin2hex(random_bytes(16));
+    } catch (Exception $e) {
+        $GLOBALS['__csp_nonce'] = bin2hex(openssl_random_pseudo_bytes(16));
+    }
+}
+$__cspNonce = $GLOBALS['__csp_nonce'];
 $csp = "default-src 'self'; " .
-       "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " .
+       "script-src 'self' 'nonce-" . $__cspNonce . "' https://cdn.jsdelivr.net; " .
        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " .
        "font-src 'self' data: https://fonts.gstatic.com; " .
        "img-src 'self' data: https:; " .

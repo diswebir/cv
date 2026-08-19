@@ -8,6 +8,10 @@ require_once __DIR__ . '/qrcode/qrcode.php';
 
 class VQR {
 
+    // Cache for QR matrices to prevent CPU DoS from repeated generation
+    private static $matrixCache = array();
+    private static $matrixCacheMax = 100;
+
     public static $themes = array(
         'classic'   => array('fg' => '#1a1a2e', 'bg' => '#ffffff', 'grad' => null),
         'dark'      => array('fg' => '#e2e8f0', 'bg' => '#0f172a', 'grad' => null),
@@ -43,6 +47,10 @@ class VQR {
     }
 
     public static function get_matrix($text, $ecc = 'H') {
+        $key = hash('sha256', $text . '|' . $ecc);
+        if (isset(self::$matrixCache[$key])) {
+            return self::$matrixCache[$key];
+        }
         $qr = QRCode::getMinimumQRCode((string)$text, self::ecc_level($ecc));
         $count = $qr->getModuleCount();
         $dark = array();
@@ -51,7 +59,13 @@ class VQR {
             for ($c = 0; $c < $count; $c++) $row[] = (bool)$qr->isDark($r, $c);
             $dark[] = $row;
         }
-        return array('size' => $count, 'dark' => $dark);
+        $result = array('size' => $count, 'dark' => $dark);
+        // Cache with simple LRU eviction
+        if (count(self::$matrixCache) >= self::$matrixCacheMax) {
+            array_shift(self::$matrixCache);
+        }
+        self::$matrixCache[$key] = $result;
+        return $result;
     }
 
     public static function hex_rgb($hex) {
@@ -70,14 +84,17 @@ class VQR {
         if (!isset(self::$themes[$theme])) $theme = 'classic';
         $dots = isset($opts['dots']) ? (string)$opts['dots'] : 'square';
         if (!in_array($dots, self::$dots, true)) $dots = 'square';
-        // Limit px to max 20 to prevent memory exhaustion
+        // Limit px to max 10 to prevent memory exhaustion (version 40 QR at px=10 = ~1800px side = ~13MB)
         $px = isset($opts['px']) ? max(1, (int)$opts['px']) : 10;
-        if ($px > 20) $px = 20;
+        if ($px > 10) $px = 10;
+        // Limit margin to reasonable value
+        $margin = isset($opts['margin']) ? max(0, (int)$opts['margin']) : 3;
+        if ($margin > 10) $margin = 10;
         return array(
             'theme' => $theme,
             'dots' => $dots,
             'px' => $px,
-            'margin' => isset($opts['margin']) ? max(0, (int)$opts['margin']) : 3,
+            'margin' => $margin,
             'ecc' => isset($opts['ecc']) ? (string)$opts['ecc'] : 'H',
             'logo' => isset($opts['logo']) ? (string)$opts['logo'] : '',
         );
@@ -358,7 +375,12 @@ class VQR {
         // Must be inside uploads directory for security
         if (strpos($safePath, 'uploads/') !== 0) return null;
         $p = VC_ROOT . '/' . $safePath;
-        return is_file($p) ? $p : null;
+        // Use realpath to prevent symlink/path traversal bypasses
+        $realUploads = realpath(VC_UPLOAD_DIR);
+        $realTarget = realpath($p);
+        if ($realTarget === false || $realUploads === false) return null;
+        if (strpos($realTarget, $realUploads) !== 0) return null;
+        return is_file($realTarget) ? $realTarget : null;
     }
 
     public static function themes_list() {

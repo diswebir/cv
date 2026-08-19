@@ -238,8 +238,8 @@ function c_share($card) {
     echo '<div class="share-row">';
     echo '<a class="share-btn" href="' . e($wa) . '" target="_blank" rel="noopener" aria-label="اشتراک در واتساپ">' . icon_svg('whatsapp', 18) . '</a>';
     echo '<a class="share-btn" href="' . e($tg) . '" target="_blank" rel="noopener" aria-label="اشتراک در تلگرام">' . icon_svg('telegram', 18) . '</a>';
-    echo '<button type="button" class="share-btn js-share" data-url="' . e($url) . '" aria-label="اشتراک‌گذاری با سایر اپلیکیشن‌ها">' . icon_svg('share', 18) . '</button>';
-    echo '<button type="button" class="share-btn js-copy" data-copy="' . e($url) . '" aria-label="کپی لینک کارت">' . icon_svg('copy', 18) . '</button>';
+    echo '<button type="button" class="share-btn js-share" data-url="' . json_encode($url, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . '" aria-label="اشتراک‌گذاری با سایر اپلیکیشن‌ها">' . icon_svg('share', 18) . '</button>';
+    echo '<button type="button" class="share-btn js-copy" data-copy="' . json_encode($url, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . '" aria-label="کپی لینک کارت">' . icon_svg('copy', 18) . '</button>';
     echo '</div></section>';
 }
 
@@ -247,3 +247,4 @@ function c_footer() {
     $app = (string)get_setting('app_name', 'cv4u');
     echo '<footer class="card-foot"><a href="' . e(base_url('')) . '">ساخته شده با ' . e($app) . '</a></footer>';
 }
+

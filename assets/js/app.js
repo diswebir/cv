@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
+  var ui = window.VCUi || { showToast: function (m) { console.log(m); }, copyText: function (t, d) { d(); } };
+
   // ---------- sidebar (mobile) ----------
   var menuBtn = document.getElementById('menuBtn');
   var sidebar = document.getElementById('sidebar');
@@ -31,21 +33,8 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // ---------- toast ----------
-  var toastEl = null;
-  function showToast(msg) {
-    if (!toastEl) {
-      toastEl = document.createElement('div');
-      toastEl.className = 'toast';
-      toastEl.setAttribute('role', 'status');
-      toastEl.setAttribute('aria-live', 'polite');
-      document.body.appendChild(toastEl);
-    }
-    toastEl.textContent = msg;
-    toastEl.classList.add('show');
-    clearTimeout(showToast._t);
-    showToast._t = setTimeout(function () { toastEl.classList.remove('show'); }, 1800);
-  }
+  // ---------- toast + copy (shared via ui.js) ----------
+  function showToast(msg) { ui.showToast(msg); }
 
   // ---------- copy to clipboard ----------
   document.addEventListener('click', function (e) {
@@ -53,24 +42,9 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!btn) return;
     var text = btn.getAttribute('data-copy');
     if (!text) return;
-    function done() { showToast('کپی شد ✓'); }
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(done).catch(function () { fallbackCopy(text, done); });
-    } else {
-      fallbackCopy(text, done);
-    }
+    try { text = JSON.parse(text); } catch (err) {}
+    ui.copyText(text, function () { showToast('کپی شد ✓'); });
   });
-
-  function fallbackCopy(text, done) {
-    var ta = document.createElement('textarea');
-    ta.value = text;
-    ta.style.position = 'fixed';
-    ta.style.opacity = '0';
-    document.body.appendChild(ta);
-    ta.select();
-    try { document.execCommand('copy'); done(); } catch (err) {}
-    document.body.removeChild(ta);
-  }
 
   // ---------- password visibility toggle ----------
   document.querySelectorAll('.pass-toggle').forEach(function (btn) {

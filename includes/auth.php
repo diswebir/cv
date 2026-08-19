@@ -122,7 +122,8 @@ function register_user($name, $email, $password) {
     $email = strtolower(trim((string)$email));
     if ($name === '') return array('ok' => false, 'error' => 'نام را وارد کنید.');
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) return array('ok' => false, 'error' => 'ایمیل معتبر نیست.');
-    if (mb_strlen($password) < 6) return array('ok' => false, 'error' => 'رمز عبور باید حداقل ۶ کاراکتر باشد.');
+    $pwdCheck = validate_password($password);
+    if (!$pwdCheck['ok']) return array('ok' => false, 'error' => $pwdCheck['error']);
     $existing = get_user_by_email($email);
     if ($existing) return array('ok' => false, 'error' => 'این ایمیل قبلاً ثبت شده است.');
     $id = create_user($name, $email, $password, 'user');

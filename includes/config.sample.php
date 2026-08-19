@@ -11,4 +11,5 @@ return array(
     'db_port' => '3306',
     'base_url' => 'http://localhost',
     'timezone' => 'Asia/Tehran',
+    'pretty_urls' => '1',
 );

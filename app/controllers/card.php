@@ -27,12 +27,12 @@ function public_card($code) {
 
 function download_vcf($code) {
     // Throttle VCF downloads per IP to prevent scraping/abuse.
-    if (rate_limit_blocked('vcf_ip_' . md5(client_ip()), 'x', 60, 60)) {
+    if (rate_limit_blocked('vcf_ip', hash('sha256', client_ip()))) {
         http_response_code(429);
         header('Content-Type: text/plain; charset=utf-8');
         exit('Too many requests');
     }
-    rate_limit_hit('vcf_ip_' . md5(client_ip()), 'x', 60, 60);
+    rate_limit_hit('vcf_ip', hash('sha256', client_ip()));
     $card = get_card_by_code($code);
     if (!$card || (int)$card['active'] !== 1) not_found();
     send_vcf($card);
@@ -67,12 +67,12 @@ function qr_image($segments) {
     } else {
         // Public QR generation with arbitrary data is CPU-intensive (ECC H),
         // so throttle it per IP to prevent resource-exhaustion DoS.
-        if (rate_limit_blocked('qr_ip_' . md5(client_ip()), 'x', 30, 60)) {
+        if (rate_limit_blocked('qr_ip', hash('sha256', client_ip()))) {
             http_response_code(429);
             header('Content-Type: text/plain; charset=utf-8');
             exit('Too many requests');
         }
-        rate_limit_hit('qr_ip_' . md5(client_ip()), 'x', 30, 60);
+        rate_limit_hit('qr_ip', hash('sha256', client_ip()));
         $text = get('data', '');
         if ($text === '' || strlen($text) > 500) {
             http_response_code(404);
@@ -87,7 +87,7 @@ function qr_image($segments) {
     if (get('logo') === '0') unset($opts['logo']);
     if (get('logo') === '1' && $card && $card['logo'] !== '') $opts['logo'] = $card['logo'];
     if (get('ecc') !== '') $opts['ecc'] = get('ecc');
-    if (get('px') !== '' && (int)get('px') >= 2 && (int)get('px') <= 40) $opts['px'] = (int)get('px');
+    if (get('px') !== '' && (int)get('px') >= 2 && (int)get('px') <= 10) $opts['px'] = (int)get('px');
 
     $fmt = 'png';
     if (get('fmt') === 'svg' || (isset($segments[1]) && substr($segments[1], -4) === '.svg') || (isset($segments[2]) && substr($segments[2], -4) === '.svg')) $fmt = 'svg';

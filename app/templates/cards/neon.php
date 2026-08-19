@@ -33,6 +33,8 @@ card_head($name, $card);
   </div>
   <?php c_footer(); ?>
 </main>
+<script src="<?= e(asset('js/ui.js')) ?>"></script>
 <script src="<?= e(asset('js/card.js')) ?>"></script>
 </body>
 </html>
+

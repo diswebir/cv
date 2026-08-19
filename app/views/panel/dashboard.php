@@ -45,7 +45,7 @@
           <?php if ($c['company']): ?><span>• <?= e($c['company']) ?></span><?php endif; ?>
         </div>
         <div class="vc-link" dir="ltr"><?= e($short) ?>
-          <button type="button" class="icon-btn copy-btn" data-copy="<?= e($short) ?>" aria-label="کپی لینک" title="کپی لینک"><?= icon_svg('copy', 15); ?></button>
+          <button type="button" class="icon-btn copy-btn" data-copy="<?= json_encode($short, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>" aria-label="کپی لینک" title="کپی لینک"><?= icon_svg('copy', 15); ?></button>
         </div>
         <div class="vc-stats"><span><?= icon_svg('eye', 14); ?> <?= fa_num_format($c['visits']) ?> بازدید</span><span><?= icon_svg('calendar', 14); ?> <?= fa_date(strtotime($c['created_at'])) ?></span></div>
       </div>
@@ -53,7 +53,7 @@
         <a class="icon-btn" target="_blank" rel="noopener" href="<?= e($short) ?>" aria-label="مشاهده کارت"><?= icon_svg('eye', 17); ?></a>
         <a class="icon-btn" href="<?= e(base_url('panel/card/' . $c['id'])) ?>" aria-label="آمار بازدید"><?= icon_svg('dashboard', 17); ?></a>
         <a class="icon-btn" href="<?= e(base_url('panel/card/edit?id=' . $c['id'])) ?>" aria-label="ویرایش کارت"><?= icon_svg('edit', 17); ?></a>
-        <a class="icon-btn" href="<?= e(base_url('qr/' . $c['code'] . '.png?download=1&px=24')) ?>" aria-label="دانلود QR" download><?= icon_svg('download', 17); ?></a>
+        <a class="icon-btn" href="<?= e(base_url('qr/' . $c['code'] . '.png?download=1&px=10')) ?>" aria-label="دانلود QR" download><?= icon_svg('download', 17); ?></a>
         <label class="mini-switch" title="<?= (int)$c['active'] === 1 ? 'غیرفعال کردن' : 'فعال کردن' ?>">
           <input type="checkbox" class="js-card-toggle" <?= (int)$c['active'] === 1 ? 'checked' : '' ?> data-url="<?= e(base_url('panel/card/toggle?id=' . $c['id'])) ?>" data-csrf="<?= e(csrf_token()) ?>">
           <span class="ms-track"></span>

@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "cv-php",
+      "runtimeExecutable": "C:/laragon/bin/php/php-8.3.20-Win32-vs16-x64/php.exe",
+      "runtimeArgs": ["-S", "127.0.0.1:0", "-t", "."],
+      "port": 8000,
+      "autoPort": true
+    }
+  ]
+}

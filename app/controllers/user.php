@@ -29,19 +29,9 @@ function panel_dashboard() {
 }
 
 function card_form_socials() {
-    $out = array();
-    // Limit to prevent excessive data
-    $maxSocials = 15;
-    $count = 0;
-    foreach (social_keys() as $k) {
-        if ($count >= $maxSocials) break;
-        $v = clean_text(post('social_' . $k), 300);
-        if ($v !== '') {
-            $out[$k] = $v;
-            $count++;
-        }
-    }
-    return $out;
+    return process_array_input('social_', 15, function($key) {
+        return clean_text(post('social_' . $key), 300);
+    });
 }
 
 function card_form_custom() {
@@ -183,18 +173,21 @@ function handle_card_form($card = null) {
         $data['code'] = $code;
         try {
             $newId = create_card($user['id'], $data);
-        } catch (Exception $e) {
-            // Most likely a UNIQUE constraint violation on `code` due to a
-            // concurrent request (TOCTOU between get_card_by_code and insert).
-            // Clean up the uploaded files so they do not become orphans, then
-            // retry once with a fresh unique code.
-            foreach ($uploaded as $p) delete_upload($p);
-            $data['code'] = unique_card_code();
-            try {
-                $newId = create_card($user['id'], $data);
-            } catch (Exception $e2) {
+        } catch (PDOException $e) {
+            // Handle UNIQUE constraint violation on `code` (SQLSTATE 23000)
+            // due to concurrent request (TOCTOU between get_card_by_code and insert).
+            if ($e->getCode() === '23000') {
                 foreach ($uploaded as $p) delete_upload($p);
-                return 'ساخت کارت ناموفق بود. لطفاً مجدداً تلاش کنید.';
+                $data['code'] = unique_card_code();
+                try {
+                    $newId = create_card($user['id'], $data);
+                } catch (PDOException $e2) {
+                    foreach ($uploaded as $p) delete_upload($p);
+                    return 'ساخت کارت ناموفق بود. لطفاً مجدداً تلاش کنید.';
+                }
+            } else {
+                foreach ($uploaded as $p) delete_upload($p);
+                throw $e;
             }
         }
         flash('کارت ویزیت با موفقیت ساخته شد.');
@@ -203,7 +196,7 @@ function handle_card_form($card = null) {
 
     try {
         update_card($card['id'], $data);
-    } catch (Exception $e) {
+    } catch (PDOException $e) {
         // On a DB error the new uploads are not linked to the card; remove them
         // to avoid orphaned files on disk.
         foreach ($uploaded as $p) delete_upload($p);

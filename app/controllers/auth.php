@@ -34,7 +34,7 @@ function auth_login() {
                         'path' => $p['path'],
                         'secure' => $p['secure'],
                         'httponly' => $p['httponly'],
-                        'samesite' => $p['samesite'] ?? 'Lax',
+                        'samesite' => $p['samesite'] ?? 'Strict',
                     ));
                     session_regenerate_id(true);
                 }
@@ -83,8 +83,9 @@ function auth_register() {
         }
         if ($pass === '') {
             $passwordError = 'رمز عبور را وارد کنید.';
-        } elseif (strlen($pass) < 12) {
-            $passwordError = 'رمز عبور باید حداقل ۱۲ کاراکتر باشد.';
+        } else {
+            $pwdCheck = validate_password($pass);
+            if (!$pwdCheck['ok']) $passwordError = $pwdCheck['error'];
         }
         if ($pass2 === '') {
             $password2Error = 'تکرار رمز عبور را وارد کنید.';

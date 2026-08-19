@@ -1,41 +1,14 @@
 document.addEventListener('DOMContentLoaded', function () {
-  var toastEl = null;
-  function showToast(msg) {
-    if (!toastEl) {
-      toastEl = document.createElement('div');
-      toastEl.className = 'toast';
-      toastEl.setAttribute('role', 'status');
-      toastEl.setAttribute('aria-live', 'polite');
-      document.body.appendChild(toastEl);
-    }
-    toastEl.textContent = msg;
-    toastEl.classList.add('show');
-    clearTimeout(showToast._t);
-    showToast._t = setTimeout(function () { toastEl.classList.remove('show'); }, 1800);
-  }
-
-  function copyText(text, done) {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(done).catch(function () { fallback(text, done); });
-    } else {
-      fallback(text, done);
-    }
-    function fallback(t, cb) {
-      var ta = document.createElement('textarea');
-      ta.value = t;
-      ta.style.position = 'fixed';
-      ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.select();
-      try { document.execCommand('copy'); cb(); } catch (err) {}
-      document.body.removeChild(ta);
-    }
-  }
+  var ui = window.VCUi || { showToast: function (m) { console.log(m); }, copyText: function (t, d) { d(); } };
+  function showToast(msg) { ui.showToast(msg); }
+  function copyText(text, done) { ui.copyText(text, done); }
 
   // ---------- copy link ----------
   document.querySelectorAll('.js-copy').forEach(function (btn) {
     btn.addEventListener('click', function () {
-      copyText(btn.getAttribute('data-copy') || '', function () {
+      var text = btn.getAttribute('data-copy') || '';
+      try { text = JSON.parse(text); } catch (err) {}
+      copyText(text, function () {
         showToast('لینک کپی شد ✓');
         var originalHtml = btn.innerHTML;
         btn.innerHTML = '✓ کپی شد';
@@ -49,6 +22,7 @@ document.addEventListener('DOMContentLoaded', function () {
   document.querySelectorAll('.js-share').forEach(function (btn) {
     btn.addEventListener('click', function () {
       var url = btn.getAttribute('data-url');
+      try { url = JSON.parse(url); } catch (err) {}
       if (navigator.share) {
         navigator.share({ title: document.title, url: url }).catch(function () {});
       } else {

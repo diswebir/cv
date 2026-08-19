@@ -244,7 +244,7 @@ $demoData = 'https://example.com';
   </form>
 </div>
 
-<script>
+<script nonce="<?= e(csp_nonce()) ?>">
 window.VC_QR_BASE = <?= json_encode($qrUrl) ?>;
 window.VC_CARD_URL = <?= json_encode(base_url($preCode)) ?>;
 </script>

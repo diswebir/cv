@@ -152,12 +152,14 @@ if (!function_exists('ie')) {
                 `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
                 `card_id` INT UNSIGNED NOT NULL,
                 `visited_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                `visit_date` DATE GENERATED ALWAYS AS (DATE(`visited_at`)) STORED,
                 `ip` VARCHAR(45) NOT NULL DEFAULT '',
                 `user_agent` VARCHAR(255) NOT NULL DEFAULT '',
                 `referer` VARCHAR(255) NOT NULL DEFAULT '',
                 PRIMARY KEY (`id`),
                 KEY `idx_card` (`card_id`),
-                KEY `idx_visited` (`visited_at`)
+                KEY `idx_visited` (`visited_at`),
+                KEY `idx_visit_date` (`visit_date`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
             'settings' => "CREATE TABLE IF NOT EXISTS `settings` (
                 `skey` VARCHAR(60) NOT NULL,
@@ -182,17 +184,10 @@ $step = isset($_GET['step']) ? (int)$_GET['step'] : 1;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     icheck();
     if (ipost('action') === 'self_delete') {
-        // Self-delete install.php after successful installation
-        // Use rename instead of unlink for Windows compatibility
-        $deletedPath = __FILE__ . '.deleted';
-        if (is_file(__FILE__)) {
-            @rename(__FILE__, $deletedPath);
-            // Fallback: try unlink if rename failed
-            if (is_file(__FILE__)) {
-                @unlink(__FILE__);
-            }
-        }
-        header('Location: ' . base_url());
+        // Self-delete is not reliable on all platforms (especially Windows).
+        // Instead of attempting auto-delete, show a warning to the user.
+        $_SESSION['install_warning'] = 'برای امنیت، لطفاً فایل install.php را به‌صورت دستی از سرور حذف کنید.';
+        header('Location: install.php?step=5');
         exit;
     }
     if (ipost('action') === 'step2') {
@@ -300,7 +295,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'db_pass' => $db['db_pass'],
             'db_port' => $db['db_port'],
             'base_url' => $baseUrl,
-            'timezone' => 'Asia/Tehran',
+            'timezone' => trim(ipost('timezone', 'Asia/Tehran')),
         );
         $written = write_config($cfg);
         if ($written) {
@@ -312,6 +307,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $st->execute(array('allow_registration', $allowReg));
                 $st->execute(array('base_url', $baseUrl));
                 $st->execute(array('footer_text', trim(ipost('footer_text'))));
+                $st->execute(array('timezone', trim(ipost('timezone', 'Asia/Tehran'))));
             } catch (Exception $e) {
                 // settings are seeded in step 2; ignore minor failures
             }
@@ -337,6 +333,13 @@ $justInstalled = !empty($_SESSION['ins_step']) && (int)$_SESSION['ins_step'] ===
 if ($justInstalled) unset($_SESSION['ins_step']);
 $installed = is_file(CONFIG_PATH);
 if (!$justInstalled && $step > 4) $step = 4;
+
+// Handle install warning from self_delete action
+$installWarning = '';
+if (!empty($_SESSION['install_warning'])) {
+    $installWarning = $_SESSION['install_warning'];
+    unset($_SESSION['install_warning']);
+}
 ?>
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
@@ -403,12 +406,11 @@ input:focus{outline:none;border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,2
     <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
       <a class="btn green" href="<?= ie($base) ?>">مشاهده‌ی سایت</a>
       <a class="btn" href="<?= ie($base) ?>/login">ورود به پنل مدیریت</a>
-      <form method="post" action="install.php" style="display:inline" onsubmit="return confirm('آیا مطمئن هستید که می‌خواهید فایل install.php را حذف کنید؟ این کار غیرقابل بازگشت است.')">
-        <input type="hidden" name="csrf" value="<?= ie(itoken()) ?>">
-        <input type="hidden" name="action" value="self_delete">
-        <button type="submit" class="btn" style="background:#dc2626;background:linear-gradient(135deg,#dc2626,#b91c1c);">🗑️ حذف install.php</button>
-      </form>
     </div>
+    <?php if ($installWarning): ?>
+    <div class="err" style="margin-top:14px"><?= ie($installWarning) ?></div>
+<?php endif; ?>
+<p class="note" style="margin-top:14px;color:#b91c1c;font-weight:600">⚠️ برای امنیت، لطفاً فایل <b>install.php</b> را از سرور حذف کنید.</p>
     <p class="note" style="margin-top:14px">با ایمیل و رمز عبور مدیر وارد شوید؛ از منوی پنل مدیریت می‌توانید کاربران، کارت‌ها و تنظیمات را مدیریت کنید.</p>
   </div>
   <?php elseif ($installed): ?>
@@ -531,6 +533,30 @@ input:focus{outline:none;border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,2
       <input type="url" name="base_url" value="<?= ie(ipost('base_url') !== '' ? ipost('base_url') : $base) ?>" dir="ltr" required>
       <label>نمونه لینک کوتاه</label>
       <div class="sample" id="sampleLink" dir="ltr"></div>
+      <label>منطقه زمانی (Timezone)</label>
+      <select name="timezone">
+        <?php
+        $timezones = array(
+            'UTC' => 'UTC (سازمان جهانی)',
+            'Asia/Tehran' => 'Asia/Tehran (ایران)',
+            'Asia/Dubai' => 'Asia/Dubai (امارات)',
+            'Asia/Riyadh' => 'Asia/Riyadh (عربستان)',
+            'Asia/Kuala_Lumpur' => 'Asia/Kuala_Lumpur (مالزی)',
+            'Asia/Tokyo' => 'Asia/Tokyo (ژاپن)',
+            'Europe/London' => 'Europe/London (انگلستان)',
+            'Europe/Paris' => 'Europe/Paris (فرانسه/آلمان)',
+            'America/New_York' => 'America/New_York (نیویورک)',
+            'America/Los_Angeles' => 'America/Los_Angeles (لس‌آنجلس)',
+            'America/Toronto' => 'America/Toronto (تورنتو)',
+            'Australia/Sydney' => 'Australia/Sydney (سیدنی)',
+        );
+        $detectedTz = @date_default_timezone_get() ?: 'Asia/Tehran';
+        foreach ($timezones as $tz => $label) {
+            $sel = (ipost('timezone') !== '' ? ipost('timezone') : $detectedTz) === $tz ? ' selected' : '';
+            echo "<option value=\"" . ie($tz) . "\"$sel>" . ie($label) . "</option>";
+        }
+        ?>
+      </select>
       <div class="check"><input type="checkbox" name="allow_registration" value="1" <?= isset($_POST['allow_registration']) ? (ipost('allow_registration') === '1' ? 'checked' : '') : 'checked' ?>> <span>ثبت‌نام کاربران در سایت فعال باشد</span></div>
       <label>متن فوتر سایت (اختیاری)</label>
       <input type="text" name="footer_text" value="<?= ie(ipost('footer_text')) ?>">

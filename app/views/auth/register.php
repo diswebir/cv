@@ -21,7 +21,7 @@
         <?php if (!empty($emailError)): ?><span id="email-error" class="field-error" role="alert" aria-live="polite"><?= e($emailError) ?></span><?php endif; ?>
       </div>
       <div class="field">
-        <label for="password">رمز عبور (حداقل ۶ کاراکتر)</label>
+        <label for="password">رمز عبور (حداقل ۸ کاراکتر)</label>
         <div class="pass-wrap">
           <input type="password" id="password" name="password" required placeholder="••••••••" dir="ltr"
             data-strength data-strength-bar="#strengthBar" data-strength-text="#strengthText" aria-describedby="password-error" <?= $passwordError !== '' ? 'aria-invalid="true"' : '' ?>>

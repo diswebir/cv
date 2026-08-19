@@ -18,7 +18,7 @@ foreach ($chart['counts'] as $c) $chartMax = max($chartMax, (int)$c);
   <div class="lb-label">لینک کوتاه کارت</div>
   <div class="lb-row">
     <code class="lb-link" dir="ltr"><?= e($short) ?></code>
-    <button type="button" class="btn btn-sm btn-primary copy-btn" data-copy="<?= e($short) ?>"><?= icon_svg('copy', 15); ?> کپی</button>
+    <button type="button" class="btn btn-sm btn-primary copy-btn" data-copy="<?= json_encode($short, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>"><?= icon_svg('copy', 15); ?> کپی</button>
   </div>
   <div class="lb-hint">این لینک در کد QR قرار گرفته است. می‌توانید آن را در سربرگ، پیام‌رسان‌ها و شبکه‌های اجتماعی به اشتراک بگذارید.</div>
 </div>
@@ -26,10 +26,10 @@ foreach ($chart['counts'] as $c) $chartMax = max($chartMax, (int)$c);
 <div class="qr-and-stats">
   <div class="qr-panel">
     <div class="qr-panel-img">
-      <img src="<?= e(card_qr_url($card, 'px=14')) ?>" alt="QR کارت <?= e($card['full_name'] ?: 'بدون نام') ?>">
+      <img src="<?= e(card_qr_url($card, 'px=10')) ?>" alt="QR کارت <?= e($card['full_name'] ?: 'بدون نام') ?>">
     </div>
     <div class="qr-panel-actions">
-      <a class="btn btn-sm btn-primary" href="<?= e(card_qr_url($card, 'px=30&download=1')) ?>" download><?= icon_svg('download', 15); ?> دانلود PNG</a>
+      <a class="btn btn-sm btn-primary" href="<?= e(card_qr_url($card, 'px=10&download=1')) ?>" download><?= icon_svg('download', 15); ?> دانلود PNG</a>
       <a class="btn btn-sm btn-ghost" href="<?= e(card_qr_url($card, 'download=1&fmt=svg')) ?>" download><?= icon_svg('download', 15); ?> SVG</a>
     </div>
     <p class="qr-panel-note">تم فعلی: <?= e($card['qr_theme']) ?> • نقطه‌های <?= e($card['qr_dots']) ?>. در صفحه ویرایش می‌توانید تم را عوض کنید.</p>

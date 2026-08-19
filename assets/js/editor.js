@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function () {
       var dlPng = document.getElementById('qrDlPng');
       var dlSvg = document.getElementById('qrDlSvg');
       if (dlPng) {
-        dlPng.href = base + '?' + qrParams(false) + '&download=1&px=30';
+        dlPng.href = base + '?' + qrParams(false) + '&download=1&px=10';
         dlPng.setAttribute('download', 'qr-code.png');
       }
       if (dlSvg) {

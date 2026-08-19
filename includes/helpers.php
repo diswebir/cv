@@ -5,12 +5,41 @@ function config($k, $default = null) {
     return array_key_exists($k, $c) ? $c[$k] : $default;
 }
 
+function csp_nonce() {
+    return isset($GLOBALS['__csp_nonce']) ? $GLOBALS['__csp_nonce'] : '';
+}
+
+function rate_limit_config($bucket) {
+    static $cache = null;
+    if ($cache === null) {
+        $cache = require VC_INC . '/constants.php';
+    }
+    return isset($cache['rate_limits'][$bucket]) ? $cache['rate_limits'][$bucket] : array('max' => 5, 'window' => 900);
+}
+
 function card_templates_allowed() {
     return array('classic', 'dark', 'minimal', 'gradient', 'business', 'neon');
 }
 
 function e($s) {
     return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
+}
+
+/**
+ * Sanitize a user-supplied base_url. Strips control chars, whitespace, and
+ * anything that could break out of an attribute or SQL context. Only schemes
+ * http/https are accepted. Returns '' on rejection.
+ */
+function sanitize_base_url($url) {
+    $url = trim((string)$url);
+    if ($url === '' || strlen($url) > 500) return '';
+    // Strip CR/LF/NULL and any whitespace which could enable header/SQL smuggling.
+    $url = preg_replace('/[\x00-\x20\x7F]/u', '', $url);
+    if (!preg_match('#^https?://#i', $url)) return '';
+    // Strip everything after the path that is not URL-safe; the host segment
+    // is also restricted to hostname characters to prevent header injection.
+    if (!preg_match('#^https?://[A-Za-z0-9.\-:]+(/[^\s"<>`\\\\]*)?$#i', $url)) return '';
+    return rtrim($url, '/');
 }
 
 function base_url($path = '') {
@@ -261,7 +290,12 @@ function delete_upload($relPath) {
     // Must be inside uploads directory
     if (strpos($safePath, 'uploads/') !== 0) return;
     $p = VC_ROOT . '/' . $safePath;
-    if (is_file($p)) unlink($p);
+    // Use realpath to prevent symlink/path traversal bypasses
+    $realUploads = realpath(VC_UPLOAD_DIR);
+    $realTarget = realpath($p);
+    if ($realTarget === false || $realUploads === false) return;
+    if (strpos($realTarget, $realUploads) !== 0) return;
+    if (is_file($realTarget)) unlink($realTarget);
 }
 
 function client_ip() {
@@ -318,6 +352,9 @@ function client_ip() {
  * rate_limit_hit() only when recording an actual failed attempt.
  */
 function rate_limit_blocked($bucket, $id, $max = 5, $window = 900) {
+    $cfg = rate_limit_config($bucket);
+    $max = $cfg['max'] ?? $max;
+    $window = $cfg['window'] ?? $window;
     $bucket = preg_replace('/[^a-zA-Z0-9_]/', '', (string)$bucket);
     $hash = hash('sha256', $bucket . '|' . (string)$id);
     $file = VC_UPLOAD_DIR . '/.ratelimit/' . substr($hash, 0, 32) . '.json';
@@ -329,6 +366,9 @@ function rate_limit_blocked($bucket, $id, $max = 5, $window = 900) {
 }
 
 function rate_limit_hit($bucket, $id, $max = 5, $window = 900) {
+    $cfg = rate_limit_config($bucket);
+    $max = $cfg['max'] ?? $max;
+    $window = $cfg['window'] ?? $window;
     $dir = VC_UPLOAD_DIR . '/.ratelimit';
     if (!is_dir($dir)) @mkdir($dir, 0755, true);
     $bucket = preg_replace('/[^a-zA-Z0-9_]/', '', (string)$bucket);
@@ -377,6 +417,30 @@ function clean_text($s, $max = 0) {
     $s = trim((string)$s);
     if ($max > 0 && mb_strlen($s) > $max) $s = mb_substr($s, 0, $max);
     return $s;
+}
+
+/**
+ * Generic array input processor for form fields like social_*, cf_*, etc.
+ * @param string $prefix Field name prefix (e.g., 'social_', 'cf_label')
+ * @param int $maxItems Maximum items to process
+ * @param callable $valueFn Function to get/sanitize value: fn(string $key, int $index) => string
+ * @return array
+ */
+function process_array_input($prefix, $maxItems, $valueFn) {
+    $out = array();
+    $count = 0;
+    foreach ($_POST as $key => $val) {
+        if ($count >= $maxItems) break;
+        if (strpos($key, $prefix) !== 0) continue;
+        $suffix = substr($key, strlen($prefix));
+        if ($suffix === '') continue;
+        $v = $valueFn($suffix, $count);
+        if ($v !== '') {
+            $out[$suffix] = $v;
+            $count++;
+        }
+    }
+    return $out;
 }
 
 function page_title($t) {
@@ -454,6 +518,21 @@ function icon_svg($name, $size = 20) {
     );
     if (!isset($paths[$name])) $name = 'info';
     return '<svg width="' . $size . '" height="' . $size . '" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' . $paths[$name] . '</svg>';
+}
+
+/**
+ * Centralized password validation. Returns array('ok' => bool, 'error' => string).
+ * Enforces minimum 8 characters.
+ */
+function validate_password($password) {
+    $len = mb_strlen($password);
+    if ($len < 8) {
+        return array('ok' => false, 'error' => 'رمز عبور باید حداقل ۸ کاراکتر باشد.');
+    }
+    if ($len > 128) {
+        return array('ok' => false, 'error' => 'رمز عبور نباید بیش از ۱۲۸ کاراکتر باشد.');
+    }
+    return array('ok' => true);
 }
 
 // Fallbacks in case the mbstring extension is missing (single-byte, degraded)

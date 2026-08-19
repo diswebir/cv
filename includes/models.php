@@ -219,8 +219,6 @@ function update_card($id, $data) {
         }
     }
     if (empty($sets)) return;
-    // Explicitly update updated_at for MySQL compatibility
-    $sets[] = 'updated_at = CURRENT_TIMESTAMP';
     $vals[] = (int)$id;
     $st = db()->prepare('UPDATE cards SET ' . implode(', ', $sets) . ' WHERE id = ?');
     $st->execute($vals);
@@ -312,8 +310,8 @@ function recent_visits($card_id, $limit = 15) {
 }
 
 function visits_by_day($days = 14) {
-    $st = db()->prepare('SELECT DATE(visited_at) AS d, COUNT(*) AS c FROM visits
-        WHERE visited_at >= DATE_SUB(CURDATE(), INTERVAL ' . (int)$days . ' DAY)
+    $st = db()->prepare('SELECT visit_date AS d, COUNT(*) AS c FROM visits
+        WHERE visit_date >= DATE_SUB(CURDATE(), INTERVAL ' . (int)$days . ' DAY)
         GROUP BY d');
     $st->execute();
     $map = array();

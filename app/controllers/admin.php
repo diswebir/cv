@@ -68,8 +68,12 @@ function admin_user_action($action) {
         $email = strtolower(trim(post('email')));
         $pass = (string)post('password');
         $role = post('role') === 'admin' ? 'admin' : 'user';
-        if ($name === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || mb_strlen($pass) < 6) {
-            admin_users('اطلاعات کاربر ناقص است (نام، ایمیل معتبر و رمز حداقل ۶ کاراکتر).', array('name' => $name, 'email' => $email, 'role' => $role));
+        $pwdCheck = validate_password($pass);
+        if ($name === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || !$pwdCheck['ok']) {
+            $msg = 'اطلاعات کاربر ناقص است (نام، ایمیل معتبر';
+            if (!$pwdCheck['ok']) $msg .= '، ' . $pwdCheck['error'];
+            $msg .= ').';
+            admin_users($msg, array('name' => $name, 'email' => $email, 'role' => $role));
             exit;
         }
         if (get_user_by_email($email)) {
@@ -96,8 +100,9 @@ function admin_user_action($action) {
 
     if ($action === 'reset') {
         $pass = (string)post('password');
-        if (mb_strlen($pass) < 6) {
-            flash('رمز عبور جدید باید حداقل ۶ کاراکتر باشد.', 'error');
+        $pwdCheck = validate_password($pass);
+        if (!$pwdCheck['ok']) {
+            flash($pwdCheck['error'], 'error');
         } else {
             update_user($id, array('password' => password_hash($pass, PASSWORD_DEFAULT)));
             flash('رمز عبور کاربر تغییر کرد.');
@@ -175,8 +180,6 @@ function admin_settings() {
         $allowReg = post('allow_registration') === '1' ? '1' : '0';
         $footer = clean_text(post('footer_text'), 500);
         if ($baseUrl === '') $baseUrl = $detected;
-        // Use sanitize_base_url from install.php for proper validation
-        require_once VC_ROOT . '/install.php';
         $sanitized = sanitize_base_url($baseUrl);
         if ($sanitized === '') {
             $error = 'آدرس پایه نامعتبر است. فقط http/https و کاراکترهای مجاز hostname/path مجاز هستند.';

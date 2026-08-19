@@ -39,6 +39,7 @@
     <p class="footer-credit">ساخته شده با <?= icon_svg('heart', 14); ?> توسط <a href="https://disweb.ir" target="_blank" rel="noopener">رضا جنترانی</a></p>
   </div>
 </footer>
+<script src="<?= e(asset('js/ui.js')) ?>"></script>
 <script src="<?= e(asset('js/app.js')) ?>"></script>
 </body>
 </html>
